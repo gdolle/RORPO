@@ -44,6 +44,7 @@ odyssee.merveille@gmail.com
 
 typedef uint16_t u_int16_t;
 
+#define ITK_4 = (ITK_VERSION_MINOR == 4)
 
 // Split a string
 std::vector<std::string> split(std::string str, char delimiter) {
@@ -195,7 +196,6 @@ R"(RORPO_multiscale_usage.
 
 int main(int argc, char **argv)
 {
-
     // -------------- Parse arguments and initialize parameters ----------------
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
                                                   {argv + 1, argv + argc},
@@ -341,6 +341,7 @@ int main(int argc, char **argv)
                                                     maskPath);
             break;
         }
+#if ITK4
         case itk::ImageIOBase::ULONG:
         {
             Image3D<unsigned long> image = dicom?Read_Itk_Image_Series<unsigned long>(imagePath):Read_Itk_Image<unsigned long>(imagePath);
@@ -353,6 +354,7 @@ int main(int argc, char **argv)
                                                     maskPath);
             break;
         }
+#endif
         case itk::ImageIOBase::LONG:
         {
             Image3D<long> image = dicom?Read_Itk_Image_Series<long>(imagePath):Read_Itk_Image<long>(imagePath);
@@ -365,6 +367,7 @@ int main(int argc, char **argv)
                                                     maskPath);
             break;
         }
+#if ITK4
         case itk::ImageIOBase::ULONGLONG:
         {
             Image3D<unsigned long long> image = dicom?Read_Itk_Image_Series<unsigned long long>(imagePath):Read_Itk_Image<unsigned long long>(imagePath);
@@ -389,6 +392,7 @@ int main(int argc, char **argv)
                                                     maskPath);
             break;
         }
+#endif
         case itk::ImageIOBase::FLOAT:
         {
             Image3D<float> image = dicom?Read_Itk_Image_Series<float>(imagePath):Read_Itk_Image<float>(imagePath);
