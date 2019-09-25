@@ -28,20 +28,72 @@ std::vector<std::string> split(std::string str, char delimiter) {
 
 
 template<typename PixelType>
-int RORPO_multiscale_usage(Image3D<PixelType> image,
+int RPO_13_usage(Image3D<PixelType> image,
                 std::string outputPath,
-                std::vector<int> scaleList,
-                int dilatSize,
+                int L,
+		int dilatSize,
                 std::vector<int> window,
                 int nbCores,
-                int verbose,
-                std::string maskPath,
-                int limitOri)
+                int verbose)
 {
     int dimz = image.Dimz();
     int dimy = image.Dimy();
     int dimx= image.Dimx();
+    
+    Image3D<unsigned char> mask;
+    
+	std::stringstream ss1;
+	ss1 <<outputPath<< "_PO1.nii";
+	std::string RPO1name = ss1.str();
 	
+	std::stringstream ss2;
+	ss2 <<outputPath<< "_PO2.nii";
+	std::string RPO2name = ss2.str();
+	
+	std::stringstream ss3;
+	ss3 <<outputPath<< "_PO3.nii";
+	std::string RPO3name = ss3.str();
+	
+	std::stringstream ss4;
+	ss4 <<outputPath<< "_PO4.nii";
+	std::string RPO4name = ss4.str();
+	
+	std::stringstream ss5;
+	ss5 <<outputPath<< "_PO5.nii";
+	std::string RPO5name = ss5.str();
+	
+	std::stringstream ss6;
+	ss6 <<outputPath<< "_PO6.nii";
+	std::string RPO6name = ss6.str();
+	
+	std::stringstream ss7;
+	ss7 <<outputPath<< "_PO7.nii";
+	std::string RPO7name = ss7.str();
+	
+	std::stringstream ss8;
+	ss8 <<outputPath<< "_PO8.nii";
+	std::string RPO8name = ss8.str();
+	
+	std::stringstream ss9;
+	ss9 <<outputPath<< "_PO9.nii";
+	std::string RPO9name = ss9.str();
+
+	std::stringstream ss10;
+	ss10 <<outputPath<< "_PO10.nii";
+	std::string RPO10name = ss10.str();
+	
+	std::stringstream ss11;
+	ss11 <<outputPath<< "_PO11.nii";
+	std::string RPO11name = ss11.str();
+	
+	std::stringstream ss12;
+	ss12 <<outputPath<< "_PO12.nii";
+	std::string RPO12name = ss12.str();
+	
+	std::stringstream ss13;
+	ss13 <<outputPath<< "_PO13.nii";
+	std::string RPO13name = ss13.str();
+
     if (verbose){
 		std::cout<<"NIFTI Image"<<std::endl;
         std::cout<<"dimx= "<<dimx<<"; dimy= "<<dimy<<"; dimz= "<<dimz<<std::endl;
@@ -57,21 +109,6 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
         std::cout<<std::endl;
 	}
 
-    // -------------------------- mask Image -----------------------------------
-		
-    Image3D<unsigned char> mask;
-
-    if (!maskPath.empty()) // A mask image is given
-	{
-        mask = read_3D_nifti_image<uint8_t>(maskPath);
-
-        if (mask.Dimx() != dimx || mask.Dimy() != dimy || mask.Dimz() != dimz){
-            std::cerr<<"Size of the mask image (dimx= "<<mask.Dimx()
-                    <<" dimy= "<<mask.Dimy()<<" dimz="<<mask.Dimz()
-                   << ") is different from size of the input image"<<std::endl;
-            return 1;
-        }
-    }
 
     // #################### Convert input image to char #######################
 
@@ -108,19 +145,38 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
 
         if(verbose)
             std::cout<<"Convert image to uint8"<<std::endl;
+            
+        Image3D<uint8_t> RPO1(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO2(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO3(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO4(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO5(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO6(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO7(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO8(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO9(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO10(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO11(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO12(dimx, dimy, dimz);
+		Image3D<uint8_t> RPO13(dimx, dimy, dimz);
 
         // Run RORPO multiscale
-        Image3D<uint8_t> multiscale=
-                RORPO_multiscale<uint8_t, uint8_t>(imageChar,
-                                                   scaleList,
-                                                   dilatSize,
-                                                   nbCores,
-                                                   verbose,
-                                                   mask,
-                                                   limitOri);
+        RPO_13<uint8_t, unsigned char>(imageChar, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13, dilatSize, nbCores, mask);
 
         // Write the result to nifti image
-        write_3D_nifti_image<uint8_t>(multiscale, outputPath);
+        write_3D_nifti_image<uint8_t>(RPO1, RPO1name);
+        write_3D_nifti_image<uint8_t>(RPO2, RPO2name);
+        write_3D_nifti_image<uint8_t>(RPO3, RPO3name);
+        write_3D_nifti_image<uint8_t>(RPO4, RPO4name);
+        write_3D_nifti_image<uint8_t>(RPO5, RPO5name);
+        write_3D_nifti_image<uint8_t>(RPO6, RPO6name);
+        write_3D_nifti_image<uint8_t>(RPO7, RPO7name);
+        write_3D_nifti_image<uint8_t>(RPO8, RPO8name);
+        write_3D_nifti_image<uint8_t>(RPO9, RPO9name);
+        write_3D_nifti_image<uint8_t>(RPO10, RPO10name);
+        write_3D_nifti_image<uint8_t>(RPO11, RPO11name);
+        write_3D_nifti_image<uint8_t>(RPO12, RPO12name);
+        write_3D_nifti_image<uint8_t>(RPO13, RPO13name);
     }
 
     // ################## Keep input image in PixelType ########################
@@ -139,19 +195,40 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
             }
             minmax = image.min_max_value();
         }
-
+        
+        Image3D<PixelType> RPO1(dimx, dimy, dimz);
+		Image3D<PixelType> RPO2(dimx, dimy, dimz);
+		Image3D<PixelType> RPO3(dimx, dimy, dimz);
+		Image3D<PixelType> RPO4(dimx, dimy, dimz);
+		Image3D<PixelType> RPO5(dimx, dimy, dimz);
+		Image3D<PixelType> RPO6(dimx, dimy, dimz);
+		Image3D<PixelType> RPO7(dimx, dimy, dimz);
+		Image3D<PixelType> RPO8(dimx, dimy, dimz);
+		Image3D<PixelType> RPO9(dimx, dimy, dimz);
+		Image3D<PixelType> RPO10(dimx, dimy, dimz);
+		Image3D<PixelType> RPO11(dimx, dimy, dimz);
+		Image3D<PixelType> RPO12(dimx, dimy, dimz);
+		Image3D<PixelType> RPO13(dimx, dimy, dimz);
+        
         // Run RORPO multiscale
-        Image3D<PixelType> multiscale=
-                RORPO_multiscale<PixelType, uint8_t>(image,
-                                                              scaleList,
-                                                              dilatSize,
-                                                              nbCores,
-                                                              verbose,
-                                                              mask,
-                                                              limitOri);
-
+        RPO_13<PixelType, unsigned char>(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13, dilatSize, nbCores, mask);
+        
+	
         // Write the result to nifti image
-        write_3D_nifti_image<PixelType>(multiscale, outputPath);
+        write_3D_nifti_image<PixelType>(RPO1, RPO1name);
+        write_3D_nifti_image<PixelType>(RPO2, RPO2name);
+        write_3D_nifti_image<PixelType>(RPO3, RPO3name);
+        write_3D_nifti_image<PixelType>(RPO4, RPO4name);
+        write_3D_nifti_image<PixelType>(RPO5, RPO5name);
+        write_3D_nifti_image<PixelType>(RPO6, RPO6name);
+        write_3D_nifti_image<PixelType>(RPO7, RPO7name);
+        write_3D_nifti_image<PixelType>(RPO8, RPO8name);
+        write_3D_nifti_image<PixelType>(RPO9, RPO9name);
+        write_3D_nifti_image<PixelType>(RPO10, RPO10name);
+        write_3D_nifti_image<PixelType>(RPO11, RPO11name);
+        write_3D_nifti_image<PixelType>(RPO12, RPO12name);
+        write_3D_nifti_image<PixelType>(RPO13, RPO13name);
+        
 
     }
 
@@ -164,17 +241,13 @@ static const char USAGE[] =
 R"(RORPO_multiscale_usage.
 
     USAGE:
-    RORPO_multiscale_usage <imagePath> <outputPath> <scaleMin> <factor> <nbScales>  <dilatSize> [--window=min,max] [--core=nbCores] [--mask=maskPath] [--verbose] [--limit=limitOri]
+    RORPO_multiscale_usage <imagePath> <outputPath> <pathLenght> <dilatSize> [--window=min,max] [--core=nbCores] [--verbose]
 
     Options:
-		 --limit=<limitOri>   Limit case treatment 0 for none, 2 for 5-ori only and 1 for both 4 and 5-ori.
          --core=<nbCores>     Number of CPUs used for RPO computation
          --window=min,max     Convert intensity range [min, max] of the intput \
                               image to [0,255] and convert to uint8 image\
                               (strongly decrease computation time).
-         --mask=maskPath      Path to a mask for the input image \
-                              (0 for the background; not 0 for the foreground).\
-                              mask image type must be uint8.
          --verbose            Activation of a verbose mode.
         )";
 
@@ -186,7 +259,7 @@ int main(int argc, char **argv)
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
                                                   {argv + 1, argv + argc},
                                                   true,
-                                                  "RORPO_multiscale_usage 2.0");
+                                                  "PO 13 orientations");
 
     std::cout<<" "<<std::endl;
     std::cout<<"Parameters: "<<std::endl;
@@ -196,21 +269,11 @@ int main(int argc, char **argv)
 
     std::string imagePath = args["<imagePath>"].asString();
     std::string outputPath = args["<outputPath>"].asString();
-    float scaleMin = std::stoi(args["<scaleMin>"].asString());
-    float factor = std::stof(args["<factor>"].asString());
-    int nbScales = std::stoi(args["<nbScales>"].asString());
-    int dilatSize = std::stoi(args["<dilatSize>"].asString());
+    float L = std::stoi(args["<pathLenght>"].asString());
+    float dilatSize = std::stoi(args["<dilatSize>"].asString());
     std::vector<int> window(3);
     int nbCores = 1;
-    int limitOri = 0;
-    std::string maskPath;
     bool verbose = args["--verbose"].asBool();
-
-	if (args["--limit"])
-        limitOri = std::stoi(args["--limit"].asString());
-        
-    if (args["--mask"])
-        maskPath = args["--mask"].asString();
 
     if (args["--core"])
         nbCores = std::stoi(args["--core"].asString());
@@ -225,22 +288,6 @@ int main(int argc, char **argv)
     }
     else
         window[2] = 0; // --window not used
-
-
-    // -------------------------- Scales computation ---------------------------
-
-    std::vector<int> scaleList(nbScales);
-    scaleList[0] = scaleMin;
-
-    for (int i = 1; i < nbScales; ++i)
-        scaleList[i] = int(scaleMin * pow(factor, i));
-
-    if (verbose){
-        std::cout<<"Scales : ";
-        std::cout<<scaleList[0];
-        for (int i = 1; i < nbScales; ++i)
-            std::cout<<','<<scaleList[i];
-    }
 
     // -------------------------- Read Nifti Image -----------------------------
     nifti_image *nim = NULL;
@@ -261,15 +308,8 @@ int main(int argc, char **argv)
             Image3D<uint8_t> image = read_3D_nifti_image<uint8_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<uint8_t>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    dilatSize,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath,
-                                                    limitOri);
+            error = RPO_13_usage<uint8_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+                                                   
             break;
     }
 
@@ -280,15 +320,7 @@ int main(int argc, char **argv)
             Image3D<u_int16_t> image = read_3D_nifti_image<u_int16_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<u_int16_t>(image,
-                                                      outputPath,
-                                                      scaleList,
-                                                      dilatSize,
-                                                      window,
-                                                      nbCores,
-                                                      verbose,
-                                                      maskPath,
-                                                      limitOri);
+            error = RPO_13_usage<u_int16_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
             break;
         }
 
@@ -299,15 +331,7 @@ int main(int argc, char **argv)
             Image3D<int32_t> image = read_3D_nifti_image<int32_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<int32_t>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    dilatSize,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath,
-                                                    limitOri);
+            error = RPO_13_usage<int32_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
             break;
         }
 
@@ -318,16 +342,7 @@ int main(int argc, char **argv)
             Image3D<float_t> image = read_3D_nifti_image<float_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<float_t>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    dilatSize,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath,
-                                                    limitOri);
-            break;
+            error = RPO_13_usage<float_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
         }
         case 256: { // int8
             if (verbose)
@@ -336,15 +351,8 @@ int main(int argc, char **argv)
             Image3D<int8_t> image = read_3D_nifti_image<int8_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<int8_t>(image,
-                                                   outputPath,
-                                                   scaleList,
-                                                   dilatSize,
-                                                   window,
-                                                   nbCores,
-                                                   verbose,
-                                                   maskPath,
-                                                   limitOri);
+            error = RPO_13_usage<int8_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
+            
             break;
         }
         case 512: { // int16
@@ -354,15 +362,8 @@ int main(int argc, char **argv)
             Image3D<int16_t> image = read_3D_nifti_image<int16_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<int16_t>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    dilatSize,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath,
-                                                    limitOri);
+            error = RPO_13_usage<int16_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+            
             break;
         }
         case 768: { // uint32
@@ -372,15 +373,8 @@ int main(int argc, char **argv)
             Image3D<uint32_t> image = read_3D_nifti_image<uint32_t>(nim);
             nifti_image_free(nim);
 
-            error = RORPO_multiscale_usage<uint32_t>(image,
-                                                     outputPath,
-                                                     scaleList,
-                                                     dilatSize,
-                                                     window,
-                                                     nbCores,
-                                                     verbose,
-                                                     maskPath,
-                                                     limitOri);
+            error = RPO_13_usage<uint32_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
+            
             break;
         }
         default : {

@@ -1,6 +1,6 @@
-# RORPO_multiscale usage executable 
+# PO 13 orientations
 
-project (RORPO_multiscale_usage)
+project (PO_13_orientations)
 cmake_minimum_required(VERSION 2.8)
 
 # FIND OPENMP

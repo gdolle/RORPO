@@ -1,36 +1,24 @@
-/* Copyright (C) 2014 Odyssee Merveille
-odyssee.merveille@gmail.com
-
-    This software is a computer program whose purpose is to compute RORPO.
-    This software is governed by the CeCILL-B license under French law and
-    abiding by the rules of distribution of free software.  You can  use,
-    modify and/ or redistribute the software under the terms of the CeCILL-B
-    license as circulated by CEA, CNRS and INRIA at the following URL
-    "http://www.cecill.info".
-
-    As a counterpart to the access to the source code and  rights to copy,
-    modify and redistribute granted by the license, users are provided only
-    with a limited warranty  and the software's author,  the holder of the
-    economic rights,  and the successive licensors  have only  limited
-    liability.
-
-    In this respect, the user's attention is drawn to the risks associated
-    with loading,  using,  modifying and/or developing or reproducing the
-    software by the user in light of its specific status of free software,
-    that may mean  that it is complicated to manipulate,  and  that  also
-    therefore means  that it is reserved for developers  and  experienced
-    professionals having in-depth computer knowledge. Users are therefore
-    encouraged to load and test the software's suitability as regards their
-    requirements in conditions enabling the security of their systems and/or
-    data to be ensured and,  more generally, to use and operate it in the
-    same conditions as regards security.
-
-    The fact that you are presently reading this means that you have had
-    knowledge of the CeCILL-B license and that you accept its terms.
-*/
-
 #ifndef GEODILATION_INCLUDED
 #define GEODILATION_INCLUDED
+
+/* Copyright (C) 2014 Odyssee Merveille
+ 
+This file is part of libRORPO
+
+    libRORPO is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    libRORPO is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with libRORPO.  If not, see <http://www.gnu.org/licenses/>.
+   
+*/
 
 #include <stdlib.h>
 #include <iostream>
@@ -45,14 +33,14 @@ odyssee.merveille@gmail.com
 template<typename T>
 Image3D<T> geodilation(Image3D<T> &G, Image3D<T> &R, int connex, int niter)
 {
-    Image3D<T> geodilat(G.dimX(), G.dimY(), G.dimZ());
-
+    Image3D<T> geodilat(G.Dimx(), G.Dimy(), G.Dimz());
+	
 	// Pink Images
     struct xvimage* imageG;
     struct xvimage* imageR;
     struct xvimage* temp;
     int32_t typepixel;
-
+    
 	if (sizeof(T)==1)
    		typepixel = VFF_TYP_1_BYTE;
    	else if (sizeof(T)==2)
@@ -62,25 +50,25 @@ Image3D<T> geodilation(Image3D<T> &G, Image3D<T> &R, int connex, int niter)
 	else
 		std::cerr<<"Error in Geodilation : ImageType not known"<<std::endl;
 
-    imageG=allocheader(NULL,G.dimX(),G.dimY(),G.dimZ(),typepixel);
+    imageG=allocheader(NULL,G.Dimx(),G.Dimy(),G.Dimz(),typepixel);
     imageG->image_data= G.get_pointer();
 
-    imageR=allocheader(NULL,G.dimX(),G.dimY(),G.dimZ(),typepixel);
+    imageR=allocheader(NULL,G.Dimx(),G.Dimy(),G.Dimz(),typepixel);
     imageR->image_data= R.get_pointer();
 
     temp=copyimage(imageG);
 
     lgeodilat(temp,imageR,connex,niter);
 
-    for (int z = 0; z<G.dimZ()  ; ++z){
-		for (int y = 0; y<G.dimY() ; ++y){
-			for (int x = 0; x<G.dimX(); ++x){
+    for (int z = 0; z<G.Dimz()  ; ++z){
+		for (int y = 0; y<G.Dimy() ; ++y){
+			for (int x = 0; x<G.Dimx(); ++x){
                     geodilat(x, y, z) = ((T *)(temp->image_data))[x
-                            + y * G.dimX() + z * G.dimX() * G.dimY()];
+                            + y * G.Dimx() + z * G.Dimx() * G.Dimy()];
 			}
 		}
 	}
-
+	
     free(imageR);
     free(imageG);
     free(temp);

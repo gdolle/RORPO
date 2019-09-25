@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(UNIX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++1y") # C++ 11 activation flag
 	SET(LIB_TYPE SHARED)
 else()
 	SET(LIB_TYPE STATIC)
@@ -27,3 +28,5 @@ include_directories(
 add_subdirectory(libRORPO)
 add_subdirectory(docopt)
 add_subdirectory(RORPO_multiscale_Usage)
+add_subdirectory(PO_13)
+add_subdirectory(PO)

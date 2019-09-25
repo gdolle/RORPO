@@ -1,6 +1,6 @@
-# RORPO_multiscale usage executable 
+# PO 
 
-project (RORPO_multiscale_usage)
+project (PO)
 cmake_minimum_required(VERSION 2.8)
 
 # FIND OPENMP

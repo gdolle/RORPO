@@ -1,3 +1,7 @@
 *.txt.user
 *~
+CMakeFiles
+*.so
+install*
+build*
 

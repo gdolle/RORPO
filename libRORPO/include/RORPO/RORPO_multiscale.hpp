@@ -1,36 +1,24 @@
-/* Copyright (C) 2014 Odyssee Merveille
-odyssee.merveille@gmail.com
-
-    This software is a computer program whose purpose is to compute RORPO.
-    This software is governed by the CeCILL-B license under French law and
-    abiding by the rules of distribution of free software.  You can  use,
-    modify and/ or redistribute the software under the terms of the CeCILL-B
-    license as circulated by CEA, CNRS and INRIA at the following URL
-    "http://www.cecill.info".
-
-    As a counterpart to the access to the source code and  rights to copy,
-    modify and redistribute granted by the license, users are provided only
-    with a limited warranty  and the software's author,  the holder of the
-    economic rights,  and the successive licensors  have only  limited
-    liability.
-
-    In this respect, the user's attention is drawn to the risks associated
-    with loading,  using,  modifying and/or developing or reproducing the
-    software by the user in light of its specific status of free software,
-    that may mean  that it is complicated to manipulate,  and  that  also
-    therefore means  that it is reserved for developers  and  experienced
-    professionals having in-depth computer knowledge. Users are therefore
-    encouraged to load and test the software's suitability as regards their
-    requirements in conditions enabling the security of their systems and/or
-    data to be ensured and,  more generally, to use and operate it in the
-    same conditions as regards security.
-
-    The fact that you are presently reading this means that you have had
-    knowledge of the CeCILL-B license and that you accept its terms.
-*/
-
 #ifndef RORPO_MULTISCALE_INCLUDED
 #define RORPO_MULTISCALE_INCLUDED
+
+/* Copyright (C) 2014 Odyssee Merveille
+ 
+This file is part of libRORPO
+
+    libRORPO is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    libRORPO is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with libRORPO.  If not, see <http://www.gnu.org/licenses/>.
+   
+*/
 
 #include <iostream>
 #include <fstream>
@@ -44,25 +32,28 @@ odyssee.merveille@gmail.com
 
 template<typename PixelType, typename MaskType>
 Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
-                                    const std::vector<int>& S_list,
+                                    std::vector<int>S_list,
+				    int dilatSize,
                                     int nb_core,
                                     int debug_flag,
-                                    Image3D<MaskType> &Mask)
+                                    Image3D<MaskType> &Mask,
+                                    int limitOri)
 {
 
     // ################## Computation of RORPO for each scale ##################
+	
+    Image3D<PixelType> Multiscale(I.Dimx(), I.Dimy(), I.Dimz());
 
-    Image3D<PixelType> Multiscale(I.dimX(), I.dimY(), I.dimZ());
-
-	std::vector<int>::const_iterator it;
-
+	std::vector<int>::iterator it;
+	
 	for (it=S_list.begin();it!=S_list.end();++it)
 	{
+	std::cout<<"DILAT SIZE before RORPO "<<dilatSize<<std::endl;
         Image3D<PixelType> One_Scale =
-                RORPO<PixelType, MaskType>(I, *it, nb_core, Mask);
+                RORPO<PixelType, MaskType>(I, *it, nb_core, dilatSize, Mask, limitOri);
 
         // Max of scales
-	    max_crush(Multiscale, One_Scale);
+	    max_crush(Multiscale, One_Scale); 
 	}
 
     // ----------------- Dynamic Enhancement ---------------
@@ -71,11 +62,18 @@ Image3D<PixelType> RORPO_multiscale(Image3D<PixelType> &I,
 	int max_value_I = I.max_value();
 
     // Contrast Enhancement
-	for ( auto& val : Multiscale.get_data() )
-        val = (PixelType)((val / (float)max_value_RORPO ) * max_value_I);
+	for (int z = 0; z < Multiscale.Dimz() ; ++z){
+		for (int y = 0; y < Multiscale.Dimy(); ++y){
+			for (int x = 0; x < Multiscale.Dimx(); ++x){
+                Multiscale(x, y, z) =
+                        (PixelType)((Multiscale(x, y, z)
+                                     / (float)max_value_RORPO ) * max_value_I);
+			}
+		}
+	}
 
 	min_crush(Multiscale, I);
-
+		
     if (!Mask.empty()) // A mask image is given
 	{
 		// Application of the non dilated mask to output

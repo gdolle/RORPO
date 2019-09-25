@@ -1,42 +1,30 @@
+#ifndef PO_INCLUDED
+#define PO_INCLUDED
+
 /* Copyright (C) 2014 Odyssee Merveille
-odyssee.merveille@gmail.com
+ 
+This file is part of libRORPO
 
-    This software is a computer program whose purpose is to compute RORPO.
-    This software is governed by the CeCILL-B license under French law and
-    abiding by the rules of distribution of free software.  You can  use,
-    modify and/ or redistribute the software under the terms of the CeCILL-B
-    license as circulated by CEA, CNRS and INRIA at the following URL
-    "http://www.cecill.info".
+    libRORPO is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-    As a counterpart to the access to the source code and  rights to copy,
-    modify and redistribute granted by the license, users are provided only
-    with a limited warranty  and the software's author,  the holder of the
-    economic rights,  and the successive licensors  have only  limited
-    liability.
+    libRORPO is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-    In this respect, the user's attention is drawn to the risks associated
-    with loading,  using,  modifying and/or developing or reproducing the
-    software by the user in light of its specific status of free software,
-    that may mean  that it is complicated to manipulate,  and  that  also
-    therefore means  that it is reserved for developers  and  experienced
-    professionals having in-depth computer knowledge. Users are therefore
-    encouraged to load and test the software's suitability as regards their
-    requirements in conditions enabling the security of their systems and/or
-    data to be ensured and,  more generally, to use and operate it in the
-    same conditions as regards security.
+    You should have received a copy of the GNU General Public License
+    along with libRORPO.  If not, see <http://www.gnu.org/licenses/>.
 
-    The fact that you are presently reading this means that you have had
-    knowledge of the CeCILL-B license and that you accept its terms.
 
 We used the Luengo Hendriks path opening algorithm presented in Fig2 of this paper:
 Luengo Hendriks, C.L., "Constrained and Dimensionality-Independent Path Openings,"
 in Image Processing, IEEE Transactions on , vol.19, no.6, pp.1587-1595, June 2010
 doi: 10.1109/TIP.2010.2044959
+
 */
-
-#ifndef PO_INCLUDED
-#define PO_INCLUDED
-
 
 #include <iostream>
 #include <string>
@@ -61,9 +49,9 @@ void create_neighbourhood(int nb_col,
 			std::vector<int> & upList,
 			std::vector<int> & downList) {
 
-    int col_shift = orientation[0];
+    int col_shift = orientation[2];
     int line_shift = orientation[1];
-    int depth_shift = orientation[2];
+    int depth_shift = orientation[0];
 
     //depth orientation [1 0 0]
     if((depth_shift == 1 && line_shift == 0 && col_shift == 0) ||
@@ -117,8 +105,8 @@ void create_neighbourhood(int nb_col,
        downList.push_back( -nb_col - 1);
        downList.push_back( dim_frame - nb_col);
        downList.push_back( -nb_col );
-
     }
+    
     //from left to right orientation [0 0 1]
     if((depth_shift == 0 && line_shift == 0 && col_shift == 1) ||
       (depth_shift == 0 && line_shift == 0 && col_shift == -1)) {
@@ -144,9 +132,9 @@ void create_neighbourhood(int nb_col,
        downList.push_back(dim_frame - 1);
        downList.push_back( -nb_col - 1);
        downList.push_back( -1 );
-
     }
-    //1st diagonal [1 1 1]
+
+    //3rd diagonal [1 1 1]
     if((depth_shift == 1 && line_shift == 1 && col_shift == 1) ||
       (depth_shift == -1 && line_shift == -1 && col_shift == -1)) {
 
@@ -172,7 +160,7 @@ void create_neighbourhood(int nb_col,
        downList.push_back(-dim_frame - nb_col - 1);
 
     }
-    //2nd diagonal [1 1 -1]
+    //4th diagonal [1 1 -1]
     if((depth_shift == 1 && line_shift == 1 && col_shift == -1) ||
       (depth_shift == -1 && line_shift == -1 && col_shift == 1)) {
 
@@ -199,7 +187,7 @@ void create_neighbourhood(int nb_col,
        downList.push_back( -dim_frame - nb_col + 1 );
 
     }
-    //3rd diagonal [-1 1 1]
+    //2nd diagonal [-1 1 1]
     if((depth_shift == -1 && line_shift == 1 && col_shift == 1) ||
       (depth_shift == 1 && line_shift == -1 && col_shift == -1)) {
 
@@ -226,7 +214,7 @@ void create_neighbourhood(int nb_col,
         downList.push_back( dim_frame - nb_col -1 );
 
     }
-    //4th diagonal [-1 1 -1]
+    //1st diagonal [-1 1 -1]
     if((depth_shift == -1 && line_shift == 1 && col_shift == -1) ||
       (depth_shift == 1 && line_shift == -1 && col_shift == 1)) {
 
@@ -251,9 +239,248 @@ void create_neighbourhood(int nb_col,
 
         //main direction
         downList.push_back( dim_frame - nb_col + 1 );
-
     }
+    
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    /////////////////////// 13 orientations ///////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////
+    
+    
+	//depth orientation [2 0 0]
+	if((depth_shift == 2 && line_shift == 0 && col_shift == 0) ||
+        (depth_shift == -2 && line_shift == 0 && col_shift == 0) ) {
 
+        upList.push_back( dim_frame - 1);
+        upList.push_back( dim_frame - nb_col);
+        upList.push_back( dim_frame + 1);
+        upList.push_back( dim_frame + nb_col);
+        upList.push_back( dim_frame );
+
+        downList.push_back( -dim_frame + 1);
+        downList.push_back( -dim_frame + nb_col);
+        downList.push_back( -dim_frame - 1);
+        downList.push_back( -dim_frame - nb_col);
+        downList.push_back( -dim_frame );
+    }
+    
+    //from up to down orientation [0 2 0]
+    if((depth_shift == 0 && line_shift == 2 && col_shift == 0) ||
+        (depth_shift == 0 && line_shift == -2 && col_shift == 0)) {
+
+        upList.push_back(nb_col - 1);
+        upList.push_back(dim_frame + nb_col);
+        upList.push_back( nb_col + 1);
+        upList.push_back( -dim_frame + nb_col);
+        upList.push_back( nb_col );
+
+        downList.push_back(-nb_col + 1);
+        downList.push_back(-dim_frame - nb_col);
+        downList.push_back( -nb_col - 1);
+        downList.push_back( dim_frame - nb_col);
+        downList.push_back( -nb_col );
+    }
+    
+    //from left to right orientation [0 0 2]
+    if((depth_shift == 0 && line_shift == 0 && col_shift == 2) ||
+      (depth_shift == 0 && line_shift == 0 && col_shift == -2)) {
+
+       upList.push_back(dim_frame + 1);
+       upList.push_back(-nb_col + 1);
+       upList.push_back(-dim_frame + 1);
+       upList.push_back( nb_col + 1);
+       upList.push_back( 1 );
+
+       downList.push_back(-dim_frame - 1);
+       downList.push_back(nb_col - 1);
+       downList.push_back(dim_frame - 1);
+       downList.push_back( -nb_col - 1);
+       downList.push_back( -1 );
+    }
+    
+     //3rd diagonal [2 2 2]
+    if((depth_shift == 2 && line_shift == 2 && col_shift == 2) ||
+        (depth_shift == -2 && line_shift == -2 && col_shift == -2)) {
+
+        upList.push_back(dim_frame + nb_col);
+        upList.push_back(dim_frame + 1 );
+        upList.push_back( nb_col + 1);
+        //main direction
+        upList.push_back(dim_frame + nb_col + 1);
+
+        downList.push_back( -dim_frame - nb_col);
+        downList.push_back( -dim_frame - 1 );
+        downList.push_back( -nb_col - 1 );
+        //main direction
+        downList.push_back(-dim_frame - nb_col - 1);
+    }
+    
+    // 4th diagonal [2 2 -2]
+    if((depth_shift == 2 && line_shift == 2 && col_shift == -2) ||
+      (depth_shift == -2 && line_shift == -2 && col_shift == 2)) {
+
+       upList.push_back(dim_frame + nb_col);
+       upList.push_back(dim_frame - 1);
+       upList.push_back(nb_col - 1);
+       //main direction
+       upList.push_back( dim_frame + nb_col - 1 );
+
+       downList.push_back(-dim_frame - nb_col);
+       downList.push_back(-dim_frame + 1 );
+       downList.push_back(-nb_col + 1 );
+       //main direction
+       downList.push_back( -dim_frame - nb_col + 1 );
+    }
+    
+    // 2nd diagonal [-2, 2, 2]
+    if((depth_shift == -2 && line_shift == 2 && col_shift == 2) ||
+      (depth_shift == 2 && line_shift == -2 && col_shift == -2)) {
+
+	upList.push_back(-dim_frame + nb_col);
+        upList.push_back( -dim_frame + 1 );
+        upList.push_back( nb_col + 1 );
+        //main direction
+        upList.push_back( -dim_frame + nb_col + 1 );
+
+        downList.push_back(dim_frame - nb_col);
+        downList.push_back( dim_frame - 1 );
+        downList.push_back( -nb_col -1 );
+        //main direction
+        downList.push_back( dim_frame - nb_col -1 );
+	}
+
+
+    // 1st diagonal [-2 2 -2]
+    if((depth_shift == -2 && line_shift == 2 && col_shift == -2) ||
+      (depth_shift == 2 && line_shift == -2 && col_shift == 2)) {
+
+        upList.push_back(-dim_frame + nb_col);
+        upList.push_back( -dim_frame - 1 );
+	upList.push_back( nb_col - 1 );
+        //main direction
+        upList.push_back( -dim_frame + nb_col - 1 );
+
+        downList.push_back(dim_frame - nb_col);
+        downList.push_back( dim_frame + 1 );
+        downList.push_back( -nb_col + 1);
+        //main direction
+        downList.push_back( dim_frame - nb_col + 1 );
+    }
+    
+     //5th diagonal [0 2 -2]
+    if((depth_shift == 0 && line_shift == 2 && col_shift == -2) ||
+        (depth_shift == 0 && line_shift == -2 && col_shift == 2)) {
+
+        upList.push_back(dim_frame - 1 );
+	upList.push_back(- dim_frame + nb_col - 1);
+	upList.push_back( nb_col );
+	upList.push_back( -1);
+        //main direction
+        upList.push_back(nb_col - 1 );
+
+        downList.push_back( -dim_frame + 1 );
+	downList.push_back( dim_frame - nb_col + 1);
+	downList.push_back( -nb_col);
+	downList.push_back( 1);
+        //main direction
+        downList.push_back( - nb_col + 1 );
+    }
+    
+    //6th diagonal [-2 2 0]
+    if((depth_shift == -2 && line_shift == 2 && col_shift == 0) ||
+      (depth_shift == 2 && line_shift == -2 && col_shift == 0)) {
+
+       upList.push_back(-dim_frame + nb_col - 1 );
+       upList.push_back(-dim_frame + nb_col + 1);
+       upList.push_back( nb_col );
+       upList.push_back( -dim_frame );
+       //main direction
+       upList.push_back( -dim_frame + nb_col );
+
+       downList.push_back( dim_frame - nb_col + 1 );
+       downList.push_back( dim_frame - nb_col - 1 );
+       downList.push_back( -nb_col );
+       downList.push_back( dim_frame );
+       //main direction
+       downList.push_back( dim_frame - nb_col );
+    }
+    
+    //7th diagonal [0 2 2]
+    if((depth_shift == 0 && line_shift == 2 && col_shift == 2) ||
+      (depth_shift == 0 && line_shift == -2 && col_shift == -2)) {
+
+	upList.push_back( dim_frame + nb_col + 1);
+        upList.push_back( -dim_frame + nb_col + 1 );
+        upList.push_back( nb_col );
+        upList.push_back( 1 );
+        //main direction
+        upList.push_back( nb_col + 1);
+
+        downList.push_back(-dim_frame - nb_col - 1 );
+        downList.push_back( dim_frame - nb_col - 1 );
+        downList.push_back( -nb_col );
+        downList.push_back( -1 );
+        //main direction
+        downList.push_back(- nb_col - 1 );
+    }
+    
+    //8th diagonal [2 2 0]
+    if((depth_shift == 2 && line_shift == 2 && col_shift == 0) ||
+      (depth_shift == -2 && line_shift == -2 && col_shift == 0)) {
+
+        upList.push_back( dim_frame + nb_col - 1);
+        upList.push_back( dim_frame + nb_col + 1 );
+        upList.push_back( nb_col );
+        upList.push_back( dim_frame );
+        //main direction
+        upList.push_back( dim_frame + nb_col );
+
+        downList.push_back(-dim_frame - nb_col + 1 );
+        downList.push_back(-dim_frame - nb_col -1 );
+        downList.push_back( -nb_col );
+        downList.push_back( -dim_frame );
+        //main direction
+        downList.push_back(-dim_frame - nb_col );
+    }
+    
+//9th diagonal [-2 0 2]
+    if((depth_shift == -2 && line_shift == 0 && col_shift == 2) ||
+      (depth_shift == 2 && line_shift == 0 && col_shift == -2)) {
+
+        upList.push_back( - dim_frame + nb_col + 1);
+        upList.push_back( - dim_frame - nb_col + 1 );
+        upList.push_back( - dim_frame );
+        upList.push_back( 1 );
+        //main direction
+        upList.push_back( - dim_frame + 1 );
+
+        downList.push_back( dim_frame - nb_col - 1);
+        downList.push_back( dim_frame + nb_col - 1 );
+        downList.push_back( dim_frame );
+        downList.push_back( -1 );
+        //main direction
+        downList.push_back( dim_frame - 1 );
+    }
+    
+//10th diagonal [2 0 2]
+    if((depth_shift == 2 && line_shift == 0 && col_shift == 2) ||
+      (depth_shift == -2 && line_shift == 0 && col_shift == -2)) {
+
+        upList.push_back( dim_frame + nb_col + 1);
+        upList.push_back( dim_frame - nb_col + 1 );
+        upList.push_back( dim_frame );
+        upList.push_back( 1 );
+        //main direction
+        upList.push_back( dim_frame + 1);
+
+        downList.push_back( -dim_frame - nb_col - 1 );
+        downList.push_back( -dim_frame + nb_col - 1 );
+        downList.push_back( -dim_frame );
+        downList.push_back( -1 );
+        //main direction
+        downList.push_back( -dim_frame - 1 );
+    }
 }
 
 
@@ -309,22 +536,22 @@ void PO_3D(Image3D<T> &image,
 		std::vector<int> &orientations,
 		Image3D<T> &Output,
 		std::vector<bool> b)
-
+			
 {
-
+	
 	// Create the offset np and nm
 	std::vector<int>np;
 	std::vector<int>nm;
-    create_neighbourhood(image.dimX(), image.dimX() * image.dimY(),
+    create_neighbourhood(image.Dimx(), image.Dimx() * image.Dimy(),
                          orientations, np, nm);
 
 	//Create other temporary images
-    std::vector<int>Lp(image.size(), L);
-    std::vector<int>Lm(image.size(), L);
+    std::vector<int>Lp(image.image_size(), L);
+    std::vector<int>Lm(image.image_size(), L);
 
 	//Create FIFO queue Qc
 	std::queue<IndexType> Qc;
-
+	
 	// Propagate
 	std::vector<IndexType>::iterator it;
 	int indice;
@@ -356,3 +583,11 @@ void PO_3D(Image3D<T> &image,
 
 
 #endif // PO_INCLUDED
+
+
+
+
+
+
+
+
