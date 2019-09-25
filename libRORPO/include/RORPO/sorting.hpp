@@ -1,37 +1,47 @@
+/* Copyright (C) 2014 Odyssee Merveille <odyssee.merveille@gmail.com>
+
+    This software is a computer program whose purpose is to compute RORPO.
+    This software is governed by the CeCILL-B license under French law and
+    abiding by the rules of distribution of free software.  You can  use,
+    modify and/ or redistribute the software under the terms of the CeCILL-B
+    license as circulated by CEA, CNRS and INRIA at the following URL
+    "http://www.cecill.info".
+
+    As a counterpart to the access to the source code and  rights to copy,
+    modify and redistribute granted by the license, users are provided only
+    with a limited warranty  and the software's author,  the holder of the
+    economic rights,  and the successive licensors  have only  limited
+    liability.
+
+    In this respect, the user's attention is drawn to the risks associated
+    with loading,  using,  modifying and/or developing or reproducing the
+    software by the user in light of its specific status of free software,
+    that may mean  that it is complicated to manipulate,  and  that  also
+    therefore means  that it is reserved for developers  and  experienced
+    professionals having in-depth computer knowledge. Users are therefore
+    encouraged to load and test the software's suitability as regards their
+    requirements in conditions enabling the security of their systems and/or
+    data to be ensured and,  more generally, to use and operate it in the
+    same conditions as regards security.
+
+    The fact that you are presently reading this means that you have had
+    knowledge of the CeCILL-B license and that you accept its terms.
+*/
+
 #ifndef SORTING_HPP_INCLUDED
 #define SORTING_HPP_INCLUDED
-
-/* Copyright (C) 2014 Odyssee Merveille
- 
-This file is part of libRORPO
-
-    libRORPO is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    libRORPO is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with libRORPO.  If not, see <http://www.gnu.org/licenses/>.
-   
-*/
 
 #include <algorithm>
 #include "Image/Image.hpp"
 
 template<typename PixelType>
-static inline void sort7_sorting_network_simple_swap(PixelType ** d){
-
+static inline void sort7_sorting_network_simple_swap(PixelType ** d)
+{
 #define mini(x, y) (x<y?x:y)
 #define maxi(x, y) (x<y?y:x)
 //#define SWAP(x,y) { const int a = min(d[x], d[y]);
 //  const int b = max(d[x], d[y]); d[x] = a; d[y] = b;}
 #define SWAP(x,y) { const int a = mini(*d[x], *d[y]); const int b = maxi(*d[x], *d[y]); *d[x] = a; *d[y] = b;}
-
 
     SWAP(1, 2);
     SWAP(3, 4);
@@ -55,12 +65,15 @@ static inline void sort7_sorting_network_simple_swap(PixelType ** d){
 #undef max
 }
 
-
 template<typename PixelType>
-static void sorting(Image3D<PixelType> &image1, Image3D<PixelType> &I2,
-                    Image3D<PixelType> &I3, Image3D<PixelType> &I4,
-                    Image3D<PixelType> &I5, Image3D<PixelType> &I6,
-                    Image3D<PixelType> &I7, int N)
+static void sorting(Image3D<PixelType>& image1,
+                    Image3D<PixelType>& I2,
+                    Image3D<PixelType>& I3,
+                    Image3D<PixelType>& I4,
+                    Image3D<PixelType>& I5,
+                    Image3D<PixelType>& I6,
+                    Image3D<PixelType>& I7,
+                    int N)
 {
     PixelType* d[7];
     d[0] = image1.get_pointer();
@@ -79,12 +92,20 @@ static void sorting(Image3D<PixelType> &image1, Image3D<PixelType> &I2,
 }
 
 #ifdef _TEST_SORT_
-int main(int argc, char **argv) {
-   for (int i=0; i<10; i++){
+int main(int argc, char **argv)
+{
+    for (int i=0; i<10; i++)
+    {
         PixelType d[7], *b[7];
-        for (int j=0;j<7; j++) {d[j]=rand()%256;b[j]=d+j;}
+        for (int j=0;j<7; j++)
+        {
+            d[j]=rand()%256;b[j]=d+j;
+        }
         sort7_sorting_network_simple_swap(b);
-        for (int j=0; j<7; j++) std::cout<< d[j] << "--" ;
+        for (int j=0; j<7; j++)
+        {
+            std::cout<< d[j] << "--" ;
+        }
         std::cout << std::endl;
     }
     int i;
@@ -100,36 +121,36 @@ bool my_sorting_function (const PixelType *i,const PixelType *j)
 // Return : True if the variable pointed by i is smaller than the
 // variabled pointed by j
 {
-	return (*i<*j);
+    return (*i<*j);
 }
 
 template<typename PixelType,typename IndexType>
 std::vector<IndexType> sort_image_value(PixelType *image, int size)
 //  Return pixels index of image sorted according to intensity
 {
-	std::vector<IndexType> index_image(size);
-	std::vector<PixelType*>index_pointer_adress(size);
-	IndexType it;
-	typename std::vector<PixelType>::iterator it1;
-	typename std::vector<PixelType*>::iterator it2;
-	typename std::vector<IndexType>::iterator it3;
+    std::vector<IndexType> index_image(size);
+    std::vector<PixelType*>index_pointer_adress(size);
+    IndexType it;
+    typename std::vector<PixelType>::iterator it1;
+    typename std::vector<PixelType*>::iterator it2;
+    typename std::vector<IndexType>::iterator it3;
 
     // Fill index_pointer_adress with memory adress of variables in image
     for (it = 0, it2 = index_pointer_adress.begin(); it != size; ++it, ++it2)
-	{
+    {
         *it2 = &image[it];
-	}
+    }
 
-	// Sorting adresses according to intensity
+    // Sorting adresses according to intensity
     std::sort(index_pointer_adress.begin(), index_pointer_adress.end(),
-              my_sorting_function<PixelType>);
+            my_sorting_function<PixelType>);
 
-	// Conversion from adresses to index of image I
+    // Conversion from adresses to index of image I
     for (it3 = index_image.begin(), it = 0; it != size; ++it, ++it3)
-	{
+    {
         *it3 = static_cast<IndexType>(index_pointer_adress[it] - &image[0]);
-	}
-	return index_image;
+    }
+    return index_image;
 }
 
 #endif // SORTING_HPP_INCLUDED
