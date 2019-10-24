@@ -53,7 +53,7 @@ Image3D<T> geodilation(Image3D<T>& G,
     struct xvimage* imageG;
     struct xvimage* imageR;
     struct xvimage* temp;
-    int32_t typepixel;
+    int32_t typepixel=0;
 
     if (sizeof(T)==1)
         typepixel = VFF_TYP_1_BYTE;

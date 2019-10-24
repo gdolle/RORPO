@@ -45,7 +45,7 @@
 #include "Image/Image.hpp"
 #include "RORPO/Algo.hpp"
 
-typedef long IndexType;
+typedef unsigned long IndexType;
 
 
 void create_neighbourhood(int nb_col,

@@ -125,7 +125,7 @@ bool my_sorting_function (const PixelType *i,const PixelType *j)
 }
 
 template<typename PixelType,typename IndexType>
-std::vector<IndexType> sort_image_value(PixelType *image, int size)
+std::vector<IndexType> sort_image_value(PixelType *image, unsigned long int size)
 //  Return pixels index of image sorted according to intensity
 {
     std::vector<IndexType> index_image(size);

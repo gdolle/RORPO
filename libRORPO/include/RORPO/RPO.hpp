@@ -48,14 +48,14 @@
 
 template<typename T, typename MaskType>
 void Stuff_PO(Image3D<T>& dilatImageWithBorders,
-              std::vector<long>& index_image,
+              std::vector<unsigned long>& index_image,
               int L,
               std::vector<bool>& b,
               Image3D<MaskType>& Mask){
 
 
     // Sort the grey level intensity in a vector
-    index_image = sort_image_value<T,long>(dilatImageWithBorders.get_pointer(),
+    index_image = sort_image_value<T,unsigned long>(dilatImageWithBorders.get_pointer(),
                                            dilatImageWithBorders.size());
 
 
@@ -214,7 +214,7 @@ void RPO(const Image3D<T>& image,
     RPO6.copy_image(dilatImageWithBorders);
     RPO7.copy_image(dilatImageWithBorders);
 
-    std::vector<long> index_image;
+    std::vector<unsigned long> index_image;
     std::vector<bool>b(dilatImageWithBorders.size(),1);
 
     Stuff_PO(dilatImageWithBorders, index_image, L, b, Mask);
