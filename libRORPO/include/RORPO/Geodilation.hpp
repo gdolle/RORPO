@@ -74,9 +74,9 @@ Image3D<T> geodilation(Image3D<T>& G,
 
     lgeodilat(temp,imageR,connex,niter);
 
-    for (int z = 0; z<G.dimZ()  ; ++z){
-        for (int y = 0; y<G.dimY() ; ++y){
-            for (int x = 0; x<G.dimX(); ++x){
+    for (unsigned int z = 0; z<G.dimZ()  ; ++z){
+        for (unsigned int y = 0; y<G.dimY() ; ++y){
+            for (unsigned int x = 0; x<G.dimX(); ++x){
                 geodilat(x, y, z) = ((T *)(temp->image_data))[x
                     + y * G.dimX() + z * G.dimX() * G.dimY()];
             }

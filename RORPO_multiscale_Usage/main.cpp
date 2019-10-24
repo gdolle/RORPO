@@ -1,34 +1,3 @@
-/* Copyright (C) 2014 Odyssee Merveille
-odyssee.merveille@gmail.com
-
-    This software is a computer program whose purpose is to compute RORPO.
-    This software is governed by the CeCILL-B license under French law and
-    abiding by the rules of distribution of free software.  You can  use,
-    modify and/ or redistribute the software under the terms of the CeCILL-B
-    license as circulated by CEA, CNRS and INRIA at the following URL
-    "http://www.cecill.info".
-
-    As a counterpart to the access to the source code and  rights to copy,
-    modify and redistribute granted by the license, users are provided only
-    with a limited warranty  and the software's author,  the holder of the
-    economic rights,  and the successive licensors  have only  limited
-    liability.
-
-    In this respect, the user's attention is drawn to the risks associated
-    with loading,  using,  modifying and/or developing or reproducing the
-    software by the user in light of its specific status of free software,
-    that may mean  that it is complicated to manipulate,  and  that  also
-    therefore means  that it is reserved for developers  and  experienced
-    professionals having in-depth computer knowledge. Users are therefore
-    encouraged to load and test the software's suitability as regards their
-    requirements in conditions enabling the security of their systems and/or
-    data to be ensured and,  more generally, to use and operate it in the
-    same conditions as regards security.
-
-    The fact that you are presently reading this means that you have had
-    knowledge of the CeCILL-B license and that you accept its terms.
-*/
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <iostream>
@@ -44,7 +13,6 @@ odyssee.merveille@gmail.com
 
 typedef uint16_t u_int16_t;
 
-#define ITK_4 = (ITK_VERSION_MINOR == 4)
 
 // Split a string
 std::vector<std::string> split(std::string str, char delimiter) {
@@ -60,34 +28,37 @@ std::vector<std::string> split(std::string str, char delimiter) {
 
 
 template<typename PixelType>
-int RORPO_multiscale_usage(Image3D<PixelType>& image,
+int RORPO_multiscale_usage(Image3D<PixelType> image,
                 std::string outputPath,
                 std::vector<int>& scaleList,
+                int dilatSize,
                 std::vector<int>& window,
                 int nbCores,
                 int verbose,
-                std::string maskPath)
+                std::string maskPath,
+                int limitOri)
 {
     unsigned int dimz = image.dimZ();
     unsigned int dimy = image.dimY();
     unsigned int dimx= image.dimX();
-
+	
     if (verbose){
-        std::cout << "dimensions: [" << dimx << ", " << dimy << ", " << dimz << "]" << std::endl;
-	}
+        std::cout << "dimensions: [" << dimx << ", " << dimy << ", " << dimz << std::endl;
+    }
 
     // ------------------ Compute input image intensity range ------------------
 
     std::pair<PixelType,PixelType> minmax = image.min_max_value();
 
     if (verbose){
-        std::cout<< "Image intensity range: "<< minmax.first << ", "
-                 << minmax.second << std::endl;
-        std::cout<<std::endl;
+        std::cout<< "Image intensity range: "
+                 << minmax.first << ", "
+                 << minmax.second << std::endl
+                 << std::endl;
 	}
 
     // -------------------------- mask Image -----------------------------------
-
+		
     Image3D<uint8_t> mask;
 
     if (!maskPath.empty()) // A mask image is given
@@ -129,12 +100,14 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
         Image3D<uint8_t> imageChar = image.copy_image_2_uchar();
 
         // Run RORPO multiscale
-        Image3D<uint8_t> multiscale =
+        Image3D<uint8_t> multiscale=
                 RORPO_multiscale<uint8_t, uint8_t>(imageChar,
                                                    scaleList,
+                                                   dilatSize,
                                                    nbCores,
                                                    verbose,
-                                                   mask);
+                                                   mask,
+                                                   limitOri);
 
         // Write the result to nifti image
         Write_Itk_Image<uint8_t>( multiscale, outputPath );
@@ -161,10 +134,12 @@ int RORPO_multiscale_usage(Image3D<PixelType>& image,
         // Run RORPO multiscale
         Image3D<PixelType> multiscale =
                 RORPO_multiscale<PixelType, uint8_t>(image,
-                                                    scaleList,
-                                                    nbCores,
-                                                    verbose,
-                                                    mask);
+                                                              scaleList,
+                                                              dilatSize,
+                                                              nbCores,
+                                                              verbose,
+                                                              mask,
+                                                              limitOri);
 
         // Write the result to nifti image
         Write_Itk_Image<PixelType>(multiscale, outputPath);
@@ -179,23 +154,25 @@ static const char USAGE[] =
 R"(RORPO_multiscale_usage.
 
     USAGE:
-    RORPO_multiscale_usage <imagePath> <outputPath> <scaleMin> <factor> <nbScales> [--window=min,max] [--core=nbCores] [--mask=maskPath] [--verbose] [--series]
+    RORPO_multiscale_usage <imagePath> <outputPath> <scaleMin> <factor> <nbScales>  <dilatSize> [--window=min,max] [--core=nbCores] [--mask=maskPath] [--verbose] [--limit=limitOri]
 
     Options:
-         --core=<nbCores>   Number of CPUs used for RPO computation
-         --window=min,max   Convert intensity range [min, max] of the intput \
-                            image to [0,255] and convert to uint8 image\
-                            (strongly decrease computation time).
-         --mask=maskPath    Path to a mask for the input image \
-                            (0 for the background; not 0 for the foreground).\
-                            mask image type must be uint8.
-         --verbose          Activation of a verbose mode.
+	 --limit=<limitOri>   Limit case treatment 0 for none, 2 for 5-ori only and 1 for both 4 and 5-ori.
+         --core=<nbCores>     Number of CPUs used for RPO computation
+         --window=min,max     Convert intensity range [min, max] of the intput \
+                              image to [0,255] and convert to uint8 image\
+                              (strongly decrease computation time).
+         --mask=maskPath      Path to a mask for the input image \
+                              (0 for the background; not 0 for the foreground).\
+                              mask image type must be uint8.
+         --verbose            Activation of a verbose mode.
          --dicom            Specify that <imagePath> is a DICOM image.
         )";
 
 
 int main(int argc, char **argv)
 {
+
     // -------------- Parse arguments and initialize parameters ----------------
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
                                                   {argv + 1, argv + argc},
@@ -213,12 +190,17 @@ int main(int argc, char **argv)
     float scaleMin = std::stoi(args["<scaleMin>"].asString());
     float factor = std::stof(args["<factor>"].asString());
     int nbScales = std::stoi(args["<nbScales>"].asString());
+    int dilatSize = std::stoi(args["<dilatSize>"].asString());
     std::vector<int> window(3);
     int nbCores = 1;
+    int limitOri = 0;
     std::string maskPath;
     bool verbose = args["--verbose"].asBool();
     bool dicom = args.count("--dicom");
 
+    if (args["--limit"])
+        limitOri = std::stoi(args["--limit"].asString());
+        
     if (args["--mask"])
         maskPath = args["--mask"].asString();
 
@@ -275,10 +257,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned char>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::CHAR:
@@ -287,10 +271,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<char>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::USHORT:
@@ -299,10 +285,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned short>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::SHORT:
@@ -311,10 +299,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<short>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::UINT:
@@ -323,10 +313,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned int>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::INT:
@@ -335,10 +327,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<int>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
 #if ITK4
@@ -348,10 +342,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned long>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
 #endif
@@ -361,10 +357,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<long>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
 #if ITK4
@@ -374,10 +372,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned long long>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
         case itk::ImageIOBase::LONGLONG:
@@ -386,10 +386,12 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<long long>(image,
                                                     outputPath,
                                                     scaleList,
+                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     verbose,
-                                                    maskPath);
+                                                    maskPath,
+                                                    limitOri);
             break;
         }
 #endif
@@ -397,24 +399,28 @@ int main(int argc, char **argv)
         {
             Image3D<float> image = dicom?Read_Itk_Image_Series<float>(imagePath):Read_Itk_Image<float>(imagePath);
             error = RORPO_multiscale_usage<float>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath);
+                                                  outputPath,
+                                                  scaleList,
+                                                  dilatSize,
+                                                  window,
+                                                  nbCores,
+                                                  verbose,
+                                                  maskPath,
+                                                  limitOri);
             break;
         }
         case itk::ImageIOBase::DOUBLE:
         {
             Image3D<double> image = dicom?Read_Itk_Image_Series<double>(imagePath):Read_Itk_Image<double>(imagePath);
             error = RORPO_multiscale_usage<double>(image,
-                                                    outputPath,
-                                                    scaleList,
-                                                    window,
-                                                    nbCores,
-                                                    verbose,
-                                                    maskPath);
+                                                   outputPath,
+                                                   scaleList,
+                                                   dilatSize,
+                                                   window,
+                                                   nbCores,
+                                                   verbose,
+                                                   maskPath,
+                                                   limitOri);
             break;
         }
         case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:

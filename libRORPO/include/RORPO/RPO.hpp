@@ -64,43 +64,43 @@ void Stuff_PO(Image3D<T>& dilatImageWithBorders,
     int new_dimx = dilatImageWithBorders.dimX();
 
     // z = 0
-    for (int y = 0; y < dilatImageWithBorders.dimY() ; ++y){
-        for (int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
+    for (unsigned int y = 0; y < dilatImageWithBorders.dimY() ; ++y){
+        for (unsigned int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
             b[y*new_dimx+x] = 0;
         }
     }
 
     //z = dimz-1
-    for (int y = 0; y < dilatImageWithBorders.dimY() ; ++y){
-        for (int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
+    for (unsigned int y = 0; y < dilatImageWithBorders.dimY() ; ++y){
+        for (unsigned int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
             b[(new_dimz-1)*new_dimx*new_dimy+y*new_dimx+x] = 0;
         }
     }
 
     //x = 0
-    for (int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
-        for (int y = 0 ; y < dilatImageWithBorders.dimY() ; ++y){
+    for (unsigned int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
+        for (unsigned int y = 0 ; y < dilatImageWithBorders.dimY() ; ++y){
             b[z*new_dimx*new_dimy+y*new_dimx] = 0;
         }
     }
 
     //x = dimx-1
-    for (int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
-        for (int y = 0 ; y < dilatImageWithBorders.dimY() ; ++y){
+    for (unsigned int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
+        for (unsigned int y = 0 ; y < dilatImageWithBorders.dimY() ; ++y){
             b[z*new_dimx*new_dimy+y*new_dimx+new_dimx-1] = 0;
         }
     }
 
     // y = 0
-    for (int z = 0 ; z < dilatImageWithBorders.dimZ(); ++z){
-        for (int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
+    for (unsigned int z = 0 ; z < dilatImageWithBorders.dimZ(); ++z){
+        for (unsigned int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
             b[z*new_dimy*new_dimx+x] = 0;
         }
     }
 
     // y = dimy-1
-    for (int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
-        for (int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
+    for (unsigned int z = 0 ; z < dilatImageWithBorders.dimZ() ; ++z){
+        for (unsigned int x = 0 ; x < dilatImageWithBorders.dimX() ; ++x){
             b[z*new_dimy*new_dimx+(new_dimy-1)*new_dimx+x] = 0;
         }
     }
@@ -115,9 +115,9 @@ void Stuff_PO(Image3D<T>& dilatImageWithBorders,
 
         // Mask dynamic [0 1] ==> [0 255] for the dilation
         int ind=0;
-        for(int z = 0; z < Mask_dilat.dimZ(); ++z) {
-            for(int y = 0 ; y < Mask_dilat.dimY(); ++y) {
-                for(int x = 0; x < Mask_dilat.dimX(); ++x) {
+        for(unsigned int z = 0; z < Mask_dilat.dimZ(); ++z) {
+            for(unsigned int y = 0 ; y < Mask_dilat.dimY(); ++y) {
+                for(unsigned int x = 0; x < Mask_dilat.dimX(); ++x) {
                     if (Mask_dilat(x,y,z) != 0){
                         Mask_dilat(x,y,z) = 255;
                         ind += 1;
@@ -132,9 +132,9 @@ void Stuff_PO(Image3D<T>& dilatImageWithBorders,
                      r_dilat, r_dilat, r_dilat, false);
 
         ind = 0;
-        for(int z = 0; z < Mask_dilat.dimZ(); ++z) {
-            for(int y = 0 ; y < Mask_dilat.dimY(); ++y) {
-                for(int x = 0; x < Mask_dilat.dimX(); ++x) {
+        for(unsigned int z = 0; z < Mask_dilat.dimZ(); ++z) {
+            for(unsigned int y = 0 ; y < Mask_dilat.dimY(); ++y) {
+                for(unsigned int x = 0; x < Mask_dilat.dimX(); ++x) {
                     if (Mask_dilat(x,y,z) == 0){
                         b[z*new_dimy*new_dimx+y*new_dimx+x] = 0;
                         ind += 1;
@@ -424,7 +424,7 @@ void RPO_13(const Image3D<T>& image,
     RPO13.copy_image(dilatImageWithBorders);
 
     std::vector<long> index_image;
-    std::vector<bool>b(dilatImageWithBorders.image_size(),1);
+    std::vector<bool>b(dilatImageWithBorders.size(),1);
 
     Stuff_PO(dilatImageWithBorders, index_image, L, b, Mask);
 

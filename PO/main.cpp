@@ -8,7 +8,7 @@
 
 #include "docopt.h"
 #include "Image/Image.hpp"
-#include "Image/Image_IO_nifti.hpp"
+//#include "Image/Image_IO_nifti.hpp"
 #include "RORPO/RPO.hpp"
 
 typedef uint16_t u_int16_t;

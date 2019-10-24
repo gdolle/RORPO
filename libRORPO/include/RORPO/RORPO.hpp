@@ -81,7 +81,7 @@ Image3D<T> RORPO(const Image3D<T> &image,
     Image3D<T> RPOt6 = RPO6.copy_image();
     Image3D<T> RPOt7 = RPO7.copy_image();
 
-    sorting(RPOt1, RPOt2, RPOt3, RPOt4, RPOt5, RPOt6, RPOt7, RPOt1.image_size());
+    sorting(RPOt1, RPOt2, RPOt3, RPOt4, RPOt5, RPOt6, RPOt7, RPOt1.size());
 
     // Clear Images which are non useful anymore
     RPOt1.clear_image();
