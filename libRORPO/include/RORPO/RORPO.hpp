@@ -50,8 +50,8 @@
 template<typename T, typename MaskType>
 Image3D<T> RORPO(const Image3D<T> &image,
                  int L,
-                 int dilatSize,
                  int nbCores,
+                 int dilationSize,
                  Image3D<MaskType> &mask,
                  int limitOri)
 {
@@ -67,9 +67,9 @@ Image3D<T> RORPO(const Image3D<T> &image,
     Image3D<T> RPO6(image.dimX() + 4, image.dimY() + 4, image.dimZ() + 4, 2);
     Image3D<T> RPO7(image.dimX() + 4, image.dimY() + 4, image.dimZ() + 4, 2);
 
-    std::cout<<"DILAT SIZE before RPO "<<dilatSize<<std::endl;
-    RPO(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, 
-            dilatSize, nbCores, mask);
+    std::cout<<"DILAT SIZE before RPO "<<dilationSize<<std::endl;
+    RPO(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7,
+        nbCores, dilationSize, mask);
 
     // ############### Sorting RPO orientations ################################
 

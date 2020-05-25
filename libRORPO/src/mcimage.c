@@ -2064,6 +2064,7 @@ struct xvimage * readimage( const char *filename )
   double xdim=1.0, ydim=1.0, zdim=1.0;
   char *read;
   char tag;
+  int bool;
 
   fd = pink_fopen_read(filename);
 
@@ -2228,11 +2229,11 @@ struct xvimage * readimage( const char *filename )
 	      b3 = b2 + N;
 	      for (i = 0; i < N; i++)
               {
-		fscanf(fd, "%d", &c);
+		bool = fscanf(fd, "%d", &c);
 		b1[i] = (uint8_t)c;
-		fscanf(fd, "%d", &c);
+		bool = fscanf(fd, "%d", &c);
 		b2[i] = (uint8_t)c;
-		fscanf(fd, "%d", &c);
+		bool = fscanf(fd, "%d", &c);
 		b3[i] = (uint8_t)c;
               } // for i
 	    } // if color
@@ -2241,7 +2242,7 @@ struct xvimage * readimage( const char *filename )
 	      N = rs * cs * ds * nb;
 	      for (i = 0; i < N; i++)
               {
-                  fscanf(fd, "%d", &c);
+                  bool = fscanf(fd, "%d", &c);
                   UCHARDATA(image)[i] = (uint8_t)c;
               } // for i
 	    }
@@ -2294,7 +2295,7 @@ struct xvimage * readimage( const char *filename )
                   uint16_t tmp;
                   for (i = 0; i < N; i++)
                   {
-                      fscanf(fd, "%hd", &tmp); (SSHORTDATA(image)[i]) = tmp;
+                      bool = fscanf(fd, "%hd", &tmp); (SSHORTDATA(image)[i]) = tmp;
                   } /* for i */
               }
               else // Standard PGM format imposes big-endian for 2-byte images, but
@@ -2303,7 +2304,7 @@ struct xvimage * readimage( const char *filename )
                   uint8_t tmp1;
                   for (i = 0; i < N; i++)
                   {
-                      (void)fread(&tmp, sizeof(uint16_t), 1, fd);
+                      bool = fread(&tmp, sizeof(uint16_t), 1, fd);
                       // conversion big-endian -> little-endian
                       tmp1 = tmp & 0x00ff;
                       tmp = tmp >> 8;
@@ -2320,7 +2321,7 @@ struct xvimage * readimage( const char *filename )
                       long int tmp;
                       for (i = 0; i < N; i++)
                       {
-                          fscanf(fd, "%ld", &tmp); (SLONGDATA(image)[i]) = (int32_t)tmp;
+                          bool = fscanf(fd, "%ld", &tmp); (SLONGDATA(image)[i]) = (int32_t)tmp;
                       } /* for i */
                   }
                   else
@@ -2344,7 +2345,7 @@ struct xvimage * readimage( const char *filename )
                       {
                           for (i = 0; i < N; i++)
                           {
-                              fscanf(fd, "%f", &(FLOATDATA(image)[i]));
+                              bool = fscanf(fd, "%f", &(FLOATDATA(image)[i]));
                           } /* for i */
                       }
                       else
@@ -2368,7 +2369,7 @@ struct xvimage * readimage( const char *filename )
                           {
                               for (i = 0; i < N; i++)
                               {
-                                  fscanf(fd, "%lf", &(DOUBLEDATA(image)[i]));
+                                  bool = fscanf(fd, "%lf", &(DOUBLEDATA(image)[i]));
                               } /* for i */
                           }
                           else
@@ -2392,7 +2393,7 @@ struct xvimage * readimage( const char *filename )
                               {
                                   for (i = 0; i < N+N; i++)
                                   {
-                                      fscanf(fd, "%f", &(FLOATDATA(image)[i]));
+                                      bool = fscanf(fd, "%f", &(FLOATDATA(image)[i]));
                                   } /* for i */
                               }
                               else
@@ -2541,6 +2542,7 @@ de la forme :
   int32_t c, ndgmax;
   int32_t dimorigin = 0;
   char *read;
+  int bool;
 
   fd = pink_fopen_read(filename);
 
@@ -2646,13 +2648,13 @@ de la forme :
       if (ndgmax == 255)
         for (i = 0; i < N; i++)
         {
-          fscanf(fd, "%d", &c);
+          bool = fscanf(fd, "%d", &c);
           UCHARDATA(image)[i] = (uint8_t)c;
         } /* for i */
       else if (ndgmax == 65535)
         for (i = 0; i < N; i++)
         {
-          fscanf(fd, "%d", &c);
+          bool = fscanf(fd, "%d", &c);
           UCHARDATA(image)[i] = (uint8_t)(c/256);
         } /* for i */
       else
@@ -2712,6 +2714,7 @@ int32_t readrgbimage(
   int32_t c;
   char *read;
   int32_t nndg, ndgmax;
+  int bool;
 
   fd = pink_fopen_read(filename);
 
@@ -2797,11 +2800,11 @@ int32_t readrgbimage(
   if (ascii)
     for (i = 0; i < N; i++)
     {
-      fscanf(fd, "%d", &c);
+      bool = fscanf(fd, "%d", &c);
       (UCHARDATA(*r))[i] = (uint8_t)c;
-      fscanf(fd, "%d", &c);
+      bool = fscanf(fd, "%d", &c);
       (UCHARDATA(*g))[i] = (uint8_t)c;
-      fscanf(fd, "%d", &c);
+      bool = fscanf(fd, "%d", &c);
       (UCHARDATA(*b))[i] = (uint8_t)c;
     } /* for i */
   else
@@ -3186,6 +3189,7 @@ int32_t readbmp(const char *filename, struct xvimage ** r, struct xvimage ** g, 
   struct BITMAPINFOHEADER InfoHeader;
   uint8_t *R, *G, *B;
   int32_t i, j, rs, cs;
+  size_t fread_out;
 
   fd = pink_fopen_read(filename);
 
@@ -3195,7 +3199,7 @@ int32_t readbmp(const char *filename, struct xvimage ** r, struct xvimage ** g, 
     return 0;
   }
 
-  fread(&(FileHeader.Signature), sizeof(char), 2, fd);
+  fread_out = fread(&(FileHeader.Signature), sizeof(char), 2, fd);
   freadulong(&(FileHeader.FileSize), fd);
   freadulong(&(FileHeader.reserved), fd);
   freadulong(&(FileHeader.DataOffset), fd);
