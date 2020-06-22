@@ -31,7 +31,6 @@ template<typename PixelType>
 int RORPO_multiscale_usage(Image3D<PixelType> image,
                 std::string outputPath,
                 std::vector<int>& scaleList,
-                int dilatSize,
                 std::vector<int>& window,
                 int nbCores,
                 int dilationSize,
@@ -108,7 +107,6 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
         Image3D<uint8_t> multiscale=
                 RORPO_multiscale<uint8_t, uint8_t>(imageChar,
                                                    scaleList,
-                                                   dilatSize,
                                                    nbCores,
                                                    dilationSize,
                                                    verbose,
@@ -202,7 +200,7 @@ R"(RORPO_multiscale_usage.
     Options:
 	 --limit=<limitOri>    Limit case treatment 0 for none, 2 for 5-ori only and 1 for both 4 and 5-ori.
          --core=<nbCores>      Number of CPUs used for RPO computation \
-         --dilationSize=<Size> Size of the dilation for the noise robustness step \ 
+         --dilationSize=<Size> Size of the dilation for the noise robustness step \
          --window=min,max      Convert intensity range [min, max] of the intput \
                                image to [0,255] and convert to uint8 image\
                                (strongly decrease computation time).
@@ -307,7 +305,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned char>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -322,7 +319,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<char>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -337,7 +333,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned short>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -352,7 +347,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<short>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -367,7 +361,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned int>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -382,7 +375,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<int>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -398,7 +390,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned long>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -414,7 +405,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<long>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -430,7 +420,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<unsigned long long>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
@@ -445,7 +434,6 @@ int main(int argc, char **argv)
             error = RORPO_multiscale_usage<long long>(image,
                                                     outputPath,
                                                     scaleList,
-                                                    dilatSize,
                                                     window,
                                                     nbCores,
                                                     dilationSize,
