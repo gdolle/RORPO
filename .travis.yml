@@ -1,0 +1,28 @@
+dist: focal
+
+language: C++
+
+addons:
+  apt:
+    update: true
+    packages:
+      - libinsighttoolkit4-dev
+      - insighttoolkit4-python
+      - cmake
+      - g++
+
+
+stages:
+  - build
+  - test
+  - name: deploy
+    if: branch = master
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make -j2
