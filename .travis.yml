@@ -1,13 +1,16 @@
-dist: focal
+dist: bionic
 
 language: C++
+
+services:
+  - docker
 
 addons:
   apt:
     update: true
     packages:
       - libinsighttoolkit4-dev
-      - insighttoolkit4-python
+      - insighttoolkit4-python3
       - cmake
       - g++
 
