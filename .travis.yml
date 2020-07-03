@@ -5,6 +5,11 @@ language: C++
 services:
   - docker
 
+
+before_install:
+  - sudo apt-get -qq update
+
+
 addons:
   apt:
     update: true
