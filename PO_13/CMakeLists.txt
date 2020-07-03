@@ -12,6 +12,10 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+# Find ITK
+find_package(ITK REQUIRED)
+include(${ITK_USE_FILE})
+
 # ADD FILES
 file(GLOB_RECURSE HEADER_FILES *.hpp *.h)
 file(GLOB_RECURSE SOURCE_FILES *.cpp)
@@ -19,7 +23,8 @@ file(GLOB_RECURSE SOURCE_FILES *.cpp)
 add_executable( ${PROJECT_NAME} ${SOURCE_FILES})
 
 # LINK REQUIRED LIBS
-target_link_libraries( ${PROJECT_NAME} Nifti RORPO docopt )
+target_link_libraries( ${PROJECT_NAME} RORPO docopt ${ITK_LIBRARIES}
+ )
 
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/ )
 

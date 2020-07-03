@@ -398,9 +398,9 @@ void RPO_13(const Image3D<T>& image,
     Image3D<T> imageDilat=image.copy_image();
 
     rect3dminmax(imageDilat.get_pointer(),
-                 imageDilat.Dimx(),
-                 imageDilat.Dimy(),
-                 imageDilat.Dimz(),
+                 imageDilat.dimX(),
+                 imageDilat.dimY(),
+                 imageDilat.dimZ(),
                  dilatSize,
                  dilatSize,
                  dilatSize,
@@ -423,7 +423,7 @@ void RPO_13(const Image3D<T>& image,
     RPO12.copy_image(dilatImageWithBorders);
     RPO13.copy_image(dilatImageWithBorders);
 
-    std::vector<long> index_image;
+    std::vector<unsigned long> index_image;
     std::vector<bool>b(dilatImageWithBorders.size(),1);
 
     Stuff_PO(dilatImageWithBorders, index_image, L, b, Mask);

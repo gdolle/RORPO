@@ -8,6 +8,7 @@
 
 #include "docopt.h"
 #include "Image/Image.hpp"
+#include "Image/Image_IO_ITK.hpp"
 #include "RORPO/RORPO_multiscale.hpp"
 
 typedef uint16_t u_int16_t;
@@ -30,14 +31,16 @@ template<typename PixelType>
 int RPO_13_usage(Image3D<PixelType> image,
                 std::string outputPath,
                 int L,
-		int dilatSize,
+		int dilationSize,
                 std::vector<int> window,
                 int nbCores,
                 int verbose)
 {
-    int dimz = image.Dimz();
-    int dimy = image.Dimy();
-    int dimx= image.Dimx();
+    using minmax_type = std::pair<PixelType,PixelType>;
+
+    int dimx= image.dimX();
+    int dimy = image.dimY();
+    int dimz = image.dimZ();
     
     Image3D<unsigned char> mask;
     
@@ -100,11 +103,11 @@ int RPO_13_usage(Image3D<PixelType> image,
 
     // ------------------ Compute input image intensity range ------------------
 
-    std::vector<PixelType> minmax = image.min_max_value();
+    minmax_type minmax = image.min_max_value();
 
     if (verbose){
-        std::cout<< "Image intensity range: "<< (float)minmax[0]<<", "
-                 << (float)minmax[1] << std::endl;
+        std::cout<< "Image intensity range: "<< (float)minmax.first<<", "
+                 << (float)minmax.second << std::endl;
         std::cout<<std::endl;
 	}
 
@@ -115,11 +118,11 @@ int RPO_13_usage(Image3D<PixelType> image,
             typeid(PixelType) == typeid(double)){
 
         if (window[2] == 1) { // window the intensity range to [0,255]
-            if (minmax[0] > (PixelType) window[0])
-                window[0] = minmax[0];
+            if (minmax.first > (PixelType) window[0])
+                window[0] = minmax.first;
 
-            if (minmax[1] < (PixelType) window[1])
-                window[1] = minmax[1];
+            if (minmax.second < (PixelType) window[1])
+                window[1] = minmax.second;
 
             image.window_dynamic(window[0], window[1]);
 
@@ -131,10 +134,10 @@ int RPO_13_usage(Image3D<PixelType> image,
         }
 
         else{ // convert the full intensity range to [0,255]
-            image.window_dynamic(minmax[0], minmax[1]);
+            image.window_dynamic(minmax.first, minmax.second);
             if(verbose){
                 std::cout<<"Convert image intensity range from: [";
-                std::cout<<minmax[0]<<", "<<minmax[1]<<"] to [";
+                std::cout<<minmax.first<<", "<<minmax.second<<"] to [";
                 std::cout<<"0"<<", "<<"255"<<"]"<<std::endl;
             }
         }
@@ -160,22 +163,24 @@ int RPO_13_usage(Image3D<PixelType> image,
 		Image3D<uint8_t> RPO13(dimx, dimy, dimz);
 
         // Run RORPO multiscale
-        RPO_13<uint8_t, unsigned char>(imageChar, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13, dilatSize, nbCores, mask);
+        RPO_13<uint8_t, unsigned char>(imageChar, L, RPO1, RPO2, RPO3, RPO4,
+                RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13,
+                dilationSize, nbCores, mask);
 
         // Write the result to nifti image
-        write_3D_nifti_image<uint8_t>(RPO1, RPO1name);
-        write_3D_nifti_image<uint8_t>(RPO2, RPO2name);
-        write_3D_nifti_image<uint8_t>(RPO3, RPO3name);
-        write_3D_nifti_image<uint8_t>(RPO4, RPO4name);
-        write_3D_nifti_image<uint8_t>(RPO5, RPO5name);
-        write_3D_nifti_image<uint8_t>(RPO6, RPO6name);
-        write_3D_nifti_image<uint8_t>(RPO7, RPO7name);
-        write_3D_nifti_image<uint8_t>(RPO8, RPO8name);
-        write_3D_nifti_image<uint8_t>(RPO9, RPO9name);
-        write_3D_nifti_image<uint8_t>(RPO10, RPO10name);
-        write_3D_nifti_image<uint8_t>(RPO11, RPO11name);
-        write_3D_nifti_image<uint8_t>(RPO12, RPO12name);
-        write_3D_nifti_image<uint8_t>(RPO13, RPO13name);
+        Write_Itk_Image<uint8_t>(RPO1, RPO1name);
+        Write_Itk_Image<uint8_t>(RPO2, RPO2name);
+        Write_Itk_Image<uint8_t>(RPO3, RPO3name);
+        Write_Itk_Image<uint8_t>(RPO4, RPO4name);
+        Write_Itk_Image<uint8_t>(RPO5, RPO5name);
+        Write_Itk_Image<uint8_t>(RPO6, RPO6name);
+        Write_Itk_Image<uint8_t>(RPO7, RPO7name);
+        Write_Itk_Image<uint8_t>(RPO8, RPO8name);
+        Write_Itk_Image<uint8_t>(RPO9, RPO9name);
+        Write_Itk_Image<uint8_t>(RPO10, RPO10name);
+        Write_Itk_Image<uint8_t>(RPO11, RPO11name);
+        Write_Itk_Image<uint8_t>(RPO12, RPO12name);
+        Write_Itk_Image<uint8_t>(RPO13, RPO13name);
     }
 
     // ################## Keep input image in PixelType ########################
@@ -184,13 +189,13 @@ int RPO_13_usage(Image3D<PixelType> image,
 
         // ------------------------ Negative intensities -----------------------
 
-        if (minmax[0] < 0){
-            image - minmax[0];
+        if (minmax.first < 0){
+            image - minmax.first;
 
             if(verbose){
                 std::cout<<"Convert image intensity range from [";
-                std::cout<<minmax[0]<<", "<<minmax[1]<<"] to [";
-                std::cout<<"0"<<", "<<minmax[1] - minmax[0]<<"]"<<std::endl;
+                std::cout<<minmax.first<<", "<<minmax.second<<"] to [";
+                std::cout<<"0"<<", "<<minmax.second - minmax.first<<"]"<<std::endl;
             }
             minmax = image.min_max_value();
         }
@@ -210,23 +215,23 @@ int RPO_13_usage(Image3D<PixelType> image,
 		Image3D<PixelType> RPO13(dimx, dimy, dimz);
         
         // Run RORPO multiscale
-        RPO_13<PixelType, unsigned char>(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13, dilatSize, nbCores, mask);
+        RPO_13<PixelType, unsigned char>(image, L, RPO1, RPO2, RPO3, RPO4, RPO5, RPO6, RPO7, RPO8, RPO9, RPO10, RPO11, RPO12, RPO13, dilationSize, nbCores, mask);
         
 	
         // Write the result to nifti image
-        write_3D_nifti_image<PixelType>(RPO1, RPO1name);
-        write_3D_nifti_image<PixelType>(RPO2, RPO2name);
-        write_3D_nifti_image<PixelType>(RPO3, RPO3name);
-        write_3D_nifti_image<PixelType>(RPO4, RPO4name);
-        write_3D_nifti_image<PixelType>(RPO5, RPO5name);
-        write_3D_nifti_image<PixelType>(RPO6, RPO6name);
-        write_3D_nifti_image<PixelType>(RPO7, RPO7name);
-        write_3D_nifti_image<PixelType>(RPO8, RPO8name);
-        write_3D_nifti_image<PixelType>(RPO9, RPO9name);
-        write_3D_nifti_image<PixelType>(RPO10, RPO10name);
-        write_3D_nifti_image<PixelType>(RPO11, RPO11name);
-        write_3D_nifti_image<PixelType>(RPO12, RPO12name);
-        write_3D_nifti_image<PixelType>(RPO13, RPO13name);
+        Write_Itk_Image<PixelType>(RPO1, RPO1name);
+        Write_Itk_Image<PixelType>(RPO2, RPO2name);
+        Write_Itk_Image<PixelType>(RPO3, RPO3name);
+        Write_Itk_Image<PixelType>(RPO4, RPO4name);
+        Write_Itk_Image<PixelType>(RPO5, RPO5name);
+        Write_Itk_Image<PixelType>(RPO6, RPO6name);
+        Write_Itk_Image<PixelType>(RPO7, RPO7name);
+        Write_Itk_Image<PixelType>(RPO8, RPO8name);
+        Write_Itk_Image<PixelType>(RPO9, RPO9name);
+        Write_Itk_Image<PixelType>(RPO10, RPO10name);
+        Write_Itk_Image<PixelType>(RPO11, RPO11name);
+        Write_Itk_Image<PixelType>(RPO12, RPO12name);
+        Write_Itk_Image<PixelType>(RPO13, RPO13name);
         
 
     }
@@ -240,7 +245,7 @@ static const char USAGE[] =
 R"(RORPO_multiscale_usage.
 
     USAGE:
-    RORPO_multiscale_usage <imagePath> <outputPath> <pathLenght> <dilatSize> [--window=min,max] [--core=nbCores] [--verbose]
+    RORPO_multiscale_usage <imagePath> <outputPath> <pathLenght> <dilationSize> [--window=min,max] [--core=nbCores] [--verbose]
 
     Options:
          --core=<nbCores>     Number of CPUs used for RPO computation
@@ -269,7 +274,7 @@ int main(int argc, char **argv)
     std::string imagePath = args["<imagePath>"].asString();
     std::string outputPath = args["<outputPath>"].asString();
     float L = std::stoi(args["<pathLenght>"].asString());
-    float dilatSize = std::stoi(args["<dilatSize>"].asString());
+    float dilationSize = std::stoi(args["<dilationSize>"].asString());
     std::vector<int> window(3);
     int nbCores = 1;
     bool verbose = args["--verbose"].asBool();
@@ -289,8 +294,8 @@ int main(int argc, char **argv)
         window[2] = 0; // --window not used
 
     // -------------------------- Read Nifti Image -----------------------------
-    nifti_image *nim = NULL;
-    nim = nifti_image_read(imagePath.c_str(), 1);
+    const std::string img_path = imagePath.c_str();
+    Image3DMetadata img_md = Read_Itk_Metadata( img_path );
 
     // ---------------- Find image type and run RORPO multiscale ---------------
     int error;
@@ -299,15 +304,14 @@ int main(int argc, char **argv)
         std::cout << "------ INPUT IMAGE -------" << std::endl;
     }
 
-    switch(nim->datatype){
+    switch(img_md.pixelType){
         case 2: { // uint8
             if (verbose)
                 std::cout<<"Input image type: uint8"<<std::endl;
 
-            Image3D<uint8_t> image = read_3D_nifti_image<uint8_t>(nim);
-            nifti_image_free(nim);
+            Image3D<uint8_t> image = Read_Itk_Image<uint8_t>(img_path);
 
-            error = RPO_13_usage<uint8_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+            error = RPO_13_usage<uint8_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
                                                    
             break;
     }
@@ -316,10 +320,9 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: uint16 "<<std::endl;
 
-            Image3D<u_int16_t> image = read_3D_nifti_image<u_int16_t>(nim);
-            nifti_image_free(nim);
+            Image3D<u_int16_t> image = Read_Itk_Image<u_int16_t>(img_path);
 
-            error = RPO_13_usage<u_int16_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+            error = RPO_13_usage<u_int16_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
             break;
         }
 
@@ -327,10 +330,9 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: int32 "<<std::endl;
 
-            Image3D<int32_t> image = read_3D_nifti_image<int32_t>(nim);
-            nifti_image_free(nim);
+            Image3D<int32_t> image = Read_Itk_Image<int32_t>(img_path);
 
-            error = RPO_13_usage<int32_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+            error = RPO_13_usage<int32_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
             break;
         }
 
@@ -338,19 +340,17 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: float "<<std::endl;
 
-            Image3D<float_t> image = read_3D_nifti_image<float_t>(nim);
-            nifti_image_free(nim);
+            Image3D<float_t> image = Read_Itk_Image<float_t>(img_path);
 
-            error = RPO_13_usage<float_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
+            error = RPO_13_usage<float_t>(image, outputPath, L, dilationSize,  window, nbCores, verbose);
         }
         case 256: { // int8
             if (verbose)
                 std::cout<<"Input image type: int8 "<<std::endl;
 
-            Image3D<int8_t> image = read_3D_nifti_image<int8_t>(nim);
-            nifti_image_free(nim);
+            Image3D<int8_t> image = Read_Itk_Image<int8_t>(img_path);
 
-            error = RPO_13_usage<int8_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
+            error = RPO_13_usage<int8_t>(image, outputPath, L, dilationSize,  window, nbCores, verbose);
             
             break;
         }
@@ -358,10 +358,9 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: int16 "<<std::endl;
 
-            Image3D<int16_t> image = read_3D_nifti_image<int16_t>(nim);
-            nifti_image_free(nim);
+            Image3D<int16_t> image = Read_Itk_Image<int16_t>(img_path);
 
-            error = RPO_13_usage<int16_t>(image, outputPath, L, dilatSize, window, nbCores, verbose);
+            error = RPO_13_usage<int16_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
             
             break;
         }
@@ -369,10 +368,9 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: uint32 "<<std::endl;
 
-            Image3D<uint32_t> image = read_3D_nifti_image<uint32_t>(nim);
-            nifti_image_free(nim);
+            Image3D<uint32_t> image = Read_Itk_Image<uint32_t>(img_path);
 
-            error = RPO_13_usage<uint32_t>(image, outputPath, L, dilatSize,  window, nbCores, verbose);
+            error = RPO_13_usage<uint32_t>(image, outputPath, L, dilationSize,  window, nbCores, verbose);
             
             break;
         }
