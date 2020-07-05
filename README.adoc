@@ -3,19 +3,6 @@
 The RORPO library provides filtering and segmentation based on 
 Ranking Orientation Responses of Path Openings
 
-== References
-
-For more information see
-
-* http://path-openings.github.io/RORPO/
-
-
-* https://hal.archives-ouvertes.fr/tel-01462887/
-* https://hal.archives-ouvertes.fr/hal-00990014
-* https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7862284
-
-Please refer to this paper for citations.
-
 == Usage
 
 See `RORPO_multiscale_Usage --help` command.
@@ -77,3 +64,16 @@ Compute the multiscale RORPO
 | Mask       | optional mask image
 |===
 
+
+== References
+
+For more information see
+
+* http://path-openings.github.io/RORPO/
+
+
+* https://hal.archives-ouvertes.fr/tel-01462887/
+* https://hal.archives-ouvertes.fr/hal-00990014
+* https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7862284
+
+Please refer to this paper for citations.
