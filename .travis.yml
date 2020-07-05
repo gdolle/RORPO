@@ -8,10 +8,13 @@ addons:
     packages:
       - libinsighttoolkit4-dev
       - libgdcm-dev
+      - libgdcm-tools
+      - libgdcm-java
+      - libgdcm-cil
       - libvtkgdcm-dev
       - libvtkgdcm-tools
       - libvtkgdcm-java
-      #- libvtkgdcm-cil
+      - libvtkgdcm-cil
       # Python 
       - insighttoolkit4-python3
       - python3-gdcm
