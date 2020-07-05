@@ -9,6 +9,21 @@ See `RORPO_multiscale_Usage --help` command.
 
 WARNING: All images must have an isotropic image resolution (cubic voxels)
 
+== Installation
+
+=== From sources
+
+Install the required dependencies beforehand. Then in a terminal
+
+```
+git@github.com:path-openings/RORPO.git && cd RORPO
+
+mkdir build && cd build
+cmake ..
+make -j4
+make install
+```
+
 == Headers
 
 === File `PO.hpp`
