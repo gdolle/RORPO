@@ -6,6 +6,7 @@ addons:
   apt:
     update: true
     packages:
+      - libfftw3-dev
       - libinsighttoolkit4-dev
       - libgdcm-dev
       - libgdcm-tools
@@ -20,8 +21,9 @@ addons:
       - python3-gdcm
       - python3-vtkgdcm
       # Build
-      - cmake
       - g++
+      - cmake
+      - make
 
 
 stages:
@@ -38,3 +40,6 @@ jobs:
         - cd build
         - cmake ..
         - make -j2
+    - stage: test
+      script:
+        - echo "RORPO Unit tests"
