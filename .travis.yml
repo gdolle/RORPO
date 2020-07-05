@@ -17,10 +17,8 @@ addons:
       - libinsighttoolkit4-dev
       - libgdcm-dev
       - libgdcm-tools
-        #- libgdcm-cil
       - libvtkgdcm-dev
       - libvtkgdcm-tools
-        #- libvtkgdcm-cil
       # Python 
       - insighttoolkit4-python3
       - python3-gdcm
@@ -48,6 +46,10 @@ jobs:
         - cmake ..
         - make -j2
 
+    - stage: build packages
+      script:
+        - make package
+
     - stage: test
       script:
         - echo "RORPO Unit tests"
@@ -57,6 +59,8 @@ jobs:
       script: echo "Deploying to GitHub releases ..."
       deploy:
         provider: releases
+        file: 
+          #- rorpo-1.0.0-Linux.tar.gz
         api_key: $GITHUB_OAUTH_TOKEN
         cleanup: false
         on:
