@@ -2,11 +2,11 @@ language: C++
 
 os:
   - linux
-    #- osx
+
+dist: focal # 20.04
 
 compiler:
   - gcc
-    #- clang
 
 addons:
   apt:
@@ -41,8 +41,6 @@ stages:
 
 jobs:
   include:
-    - os: linux
-      dist: focal
     - stage: build
       script:
         - mkdir build
@@ -55,10 +53,11 @@ jobs:
         - echo "RORPO Unit tests"
 
     - stage: deploy GitHub Release
+      if: branch = master
       script: echo "Deploying to GitHub releases ..."
       deploy:
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
-        skip_cleanup: true
+        cleanup: false
         on:
           tags: true
