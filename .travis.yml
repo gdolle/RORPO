@@ -1,6 +1,12 @@
-dist: focal
-
 language: C++
+
+os:
+  - linux
+    #- osx
+
+compiler:
+  - gcc
+    #- clang
 
 addons:
   apt:
@@ -10,11 +16,9 @@ addons:
       - libinsighttoolkit4-dev
       - libgdcm-dev
       - libgdcm-tools
-      - libgdcm-java
         #- libgdcm-cil
       - libvtkgdcm-dev
       - libvtkgdcm-tools
-      - libvtkgdcm-java
         #- libvtkgdcm-cil
       # Python 
       - insighttoolkit4-python3
@@ -24,22 +28,36 @@ addons:
       - g++
       - cmake
       - make
-
+      # Packages
+      - dpkg
 
 stages:
   - build
   - test
+  - packages
   - name: deploy
     if: branch = master
 
 jobs:
   include:
+    - os: linux
+      dist: focal
     - stage: build
       script:
         - mkdir build
         - cd build
         - cmake ..
         - make -j2
+
     - stage: test
       script:
         - echo "RORPO Unit tests"
+
+    - stage: deploy GitHub Release
+      script: echo "Deploying to GitHub releases ..."
+      deploy:
+        provider: releases
+        api_key: $GITHUB_OAUTH_TOKEN
+        skip_cleanup: true
+        on:
+          tags: true
