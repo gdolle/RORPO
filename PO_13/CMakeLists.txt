@@ -23,8 +23,8 @@ file(GLOB_RECURSE SOURCE_FILES *.cpp)
 add_executable( ${PROJECT_NAME} ${SOURCE_FILES})
 
 # LINK REQUIRED LIBS
-target_link_libraries( ${PROJECT_NAME} RORPO docopt ${ITK_LIBRARIES}
- )
+target_link_libraries( ${PROJECT_NAME} RORPO docopt ${ITK_LIBRARIES} )
+set_target_properties( ${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin" )
 
 install( TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin/ )
 
