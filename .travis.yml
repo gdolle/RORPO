@@ -12,6 +12,7 @@ addons:
   apt:
     update: true
     packages:
+      - libdocopt-dev
       - libfftw3-dev
       - libinsighttoolkit4-dev
       - libgdcm-dev
