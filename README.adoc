@@ -8,7 +8,11 @@ Ranking Orientation Responses of Path Openings
 For more information see
 
 * http://path-openings.github.io/RORPO/
+
+
+* https://hal.archives-ouvertes.fr/tel-01462887/
 * https://hal.archives-ouvertes.fr/hal-00990014
+* https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7862284
 
 Please refer to this paper for citations.
 
