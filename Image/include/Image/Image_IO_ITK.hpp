@@ -80,9 +80,9 @@ Image3D<PixelType> Read_Itk_Image(const std::string& image_path)
 	auto spacing = itkImage->GetSpacing();
 	auto origin = itkImage->GetOrigin();
 	Image3D<PixelType> image(itkSize[0], itkSize[1], itkSize[2],spacing[0],spacing[1],spacing[2],origin[0],origin[1],origin[2]);
-    image.add_data_from_pointer(itkImage->GetBufferPointer());
+        image.add_data_from_pointer(itkImage->GetBufferPointer());
 
-    return image;
+        return image;
 }
 
 template<typename PixelType>
@@ -134,11 +134,11 @@ void Write_Itk_Image( Image3D<PixelType>& image, const std::string& image_path )
 	typedef itk::Image<PixelType, 3> ITKImageType;
 
 	// Convert image to ITK image
-    typedef typename itk::ImportImageFilter<PixelType, 3> ImportImageFilterType;
-    typename ImportImageFilterType::Pointer importFilter = ImportImageFilterType::New();
+        typedef typename itk::ImportImageFilter<PixelType, 3> ImportImageFilterType;
+        typename ImportImageFilterType::Pointer importFilter = ImportImageFilterType::New();
 
-    typename ImportImageFilterType::IndexType start;
-    start.Fill(0);
+        typename ImportImageFilterType::IndexType start;
+        start.Fill(0);
 	typename ImportImageFilterType::SizeType size = { image.dimX(), image.dimY(), image.dimZ() };
 	typename ImportImageFilterType::RegionType region;
 	region.SetIndex(start);

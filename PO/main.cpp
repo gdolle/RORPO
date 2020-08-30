@@ -44,33 +44,33 @@ int RPO_usage(Image3D<PixelType> image,
     
     Image3D<unsigned char> mask;
     
-	std::stringstream ss1;
-	ss1 <<outputPath<< "_PO1.nii";
-	std::string RPO1name = ss1.str();
-	
-	std::stringstream ss2;
-	ss2 <<outputPath<< "_PO2.nii";
-	std::string RPO2name = ss2.str();
-	
-	std::stringstream ss3;
-	ss3 <<outputPath<< "_PO3.nii";
-	std::string RPO3name = ss3.str();
-	
-	std::stringstream ss4;
-	ss4 <<outputPath<< "_PO4.nii";
-	std::string RPO4name = ss4.str();
-	
-	std::stringstream ss5;
-	ss5 <<outputPath<< "_PO5.nii";
-	std::string RPO5name = ss5.str();
-	
-	std::stringstream ss6;
-	ss6 <<outputPath<< "_PO6.nii";
-	std::string RPO6name = ss6.str();
-	
-	std::stringstream ss7;
-	ss7 <<outputPath<< "_PO7.nii";
-	std::string RPO7name = ss7.str();
+    std::stringstream ss1;
+    ss1 <<outputPath<< "_PO1.nii";
+    std::string RPO1name = ss1.str();
+
+    std::stringstream ss2;
+    ss2 <<outputPath<< "_PO2.nii";
+    std::string RPO2name = ss2.str();
+
+    std::stringstream ss3;
+    ss3 <<outputPath<< "_PO3.nii";
+    std::string RPO3name = ss3.str();
+
+    std::stringstream ss4;
+    ss4 <<outputPath<< "_PO4.nii";
+    std::string RPO4name = ss4.str();
+
+    std::stringstream ss5;
+    ss5 <<outputPath<< "_PO5.nii";
+    std::string RPO5name = ss5.str();
+
+    std::stringstream ss6;
+    ss6 <<outputPath<< "_PO6.nii";
+    std::string RPO6name = ss6.str();
+
+    std::stringstream ss7;
+    ss7 <<outputPath<< "_PO7.nii";
+    std::string RPO7name = ss7.str();
 
     if (verbose){
 		std::cout<<"NIFTI Image"<<std::endl;
@@ -202,11 +202,14 @@ R"(RORPO_multiscale_usage.
     RPO <imagePath> <outputPath> <pathLenght> <dilationSize> [--window=min,max] [--core=nbCores] [--verbose]
 
     Options:
-         --core=<nbCores>     Number of CPUs used for RPO computation
-         --window=min,max     Convert intensity range [min, max] of the intput \
-                              image to [0,255] and convert to uint8 image\
-                              (strongly decrease computation time).
-         --verbose            Activation of a verbose mode.
+         --limit=<limitOri>    Limit case treatment 0 for none, 2 for 5-ori only and 1 for both 4 and 5-ori.
+         --core=<nbCores>      Number of CPUs used for RPO computation
+         --dilationSize=<Size> Size of the dilation for the noise robustness step \
+         --window=min,max      Convert intensity range [min, max] of the intput \
+                               image to [0,255] and convert to uint8 image\
+                               (strongly decrease computation time).
+         --verbose             Activation of a verbose mode.
+         --dicom               Specify that <imagePath> is a DICOM image.
         )";
 
 
@@ -225,16 +228,30 @@ int main(int argc, char **argv)
         std::cout << arg.first << ": " << arg.second << std::endl;
     }
 
-    std::string imagePath = args["<imagePath>"].asString();
-    std::string outputPath = args["<outputPath>"].asString();
+    std::string imagePath = args["--input"].asString();
+    std::string outputPath = args["--output"].asString();
+    float scaleMin = std::stoi(args["--scaleMin"].asString());
+    float factor = std::stof(args["--factor"].asString());
+    int nbScales = std::stoi(args["--nbScales"].asString());
     int L = std::stoi(args["<pathLenght>"].asString());
-    int dilationSize = std::stoi(args["<dilationSize>"].asString());
     std::vector<int> window(3);
     int nbCores = 1;
+    int dilationSize = 3;
+    int limitOri = 0;
+    std::string maskPath;
     bool verbose = args["--verbose"].asBool();
+
+    if (args["--limit"])
+        limitOri = std::stoi(args["--limit"].asString());
+
+    if (args["--mask"])
+        maskPath = args["--mask"].asString();
 
     if (args["--core"])
         nbCores = std::stoi(args["--core"].asString());
+
+    if(args["--dilationSize"])
+        dilationSize = std::stoi(args["--dilationSize"].asString());
 
     if (args["--window"]){
         std::vector<std::string> windowVector =
@@ -247,9 +264,23 @@ int main(int argc, char **argv)
     else
         window[2] = 0; // --window not used
 
+    // -------------------------- Scales computation ---------------------------
+
+    std::vector<int> scaleList(nbScales);
+    scaleList[0] = scaleMin;
+
+    for (int i = 1; i < nbScales; ++i)
+        scaleList[i] = int(scaleMin * pow(factor, i));
+
+    if (verbose){
+        std::cout<<"Scales : ";
+        std::cout<<scaleList[0];
+        for (int i = 1; i < nbScales; ++i)
+            std::cout<<','<<scaleList[i];
+    }
+
     // -------------------------- Read Nifti Image -----------------------------
-    const std::string img_path = imagePath.c_str();
-    Image3DMetadata img_md = Read_Itk_Metadata( img_path );
+    Image3DMetadata imageMetadata = Read_Itk_Metadata( imagePath );
 
     // ---------------- Find image type and run RORPO multiscale ---------------
     int error;
@@ -258,14 +289,20 @@ int main(int argc, char **argv)
         std::cout << "------ INPUT IMAGE -------" << std::endl;
     }
 
-    switch(img_md.pixelType){
+    switch(imageMetadata.pixelType){
         case 2: { // uint8
             if (verbose)
                 std::cout<<"Input image type: uint8"<<std::endl;
 
-            Image3D<uint8_t> image = Read_Itk_Image<uint8_t>(img_path);
+            Image3D<uint8_t> image = Read_Itk_Image<uint8_t>(imagePath);
 
-            error = RPO_usage<uint8_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<uint8_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
                                                    
             break;
     }
@@ -274,9 +311,15 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: uint16 "<<std::endl;
 
-            Image3D<u_int16_t> image = Read_Itk_Image<u_int16_t>(img_path);
+            Image3D<u_int16_t> image = Read_Itk_Image<u_int16_t>(imagePath);
 
-            error = RPO_usage<u_int16_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<u_int16_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
             break;
         }
 
@@ -284,9 +327,15 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: int32 "<<std::endl;
 
-            Image3D<int32_t> image = Read_Itk_Image<int32_t>(img_path);
+            Image3D<int32_t> image = Read_Itk_Image<int32_t>(imagePath);
 
-            error = RPO_usage<int32_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<int32_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
             break;
         }
 
@@ -294,17 +343,29 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: float "<<std::endl;
 
-            Image3D<float_t> image = Read_Itk_Image<float_t>(img_path);
+            Image3D<float_t> image = Read_Itk_Image<float_t>(imagePath);
 
-            error = RPO_usage<float_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<float_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
         }
         case 256: { // int8
             if (verbose)
                 std::cout<<"Input image type: int8 "<<std::endl;
 
-            Image3D<int8_t> image = Read_Itk_Image<int8_t>(img_path);
+            Image3D<int8_t> image = Read_Itk_Image<int8_t>(imagePath);
 
-            error = RPO_usage<int8_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<int8_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
             
             break;
         }
@@ -312,9 +373,15 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: int16 "<<std::endl;
 
-            Image3D<int16_t> image = Read_Itk_Image<int16_t>(img_path);
+            Image3D<int16_t> image = Read_Itk_Image<int16_t>(imagePath);
 
-            error = RPO_usage<int16_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<int16_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
             
             break;
         }
@@ -322,12 +389,19 @@ int main(int argc, char **argv)
             if (verbose)
                 std::cout<<"Input image type: uint32 "<<std::endl;
 
-            Image3D<uint32_t> image = Read_Itk_Image<uint32_t>(img_path);
+            Image3D<uint32_t> image = Read_Itk_Image<uint32_t>(imagePath);
 
-            error = RPO_usage<uint32_t>(image, outputPath, L, dilationSize, window, nbCores, verbose);
+            error = RPO_usage<uint32_t>(image,
+                    outputPath,
+                    L,
+                    dilationSize,
+                    window,
+                    nbCores,
+                    verbose);
             
             break;
         }
+        case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:
         default : {
             std::cerr<<"Input image type not supported "<<std::endl;
             error = 1;
