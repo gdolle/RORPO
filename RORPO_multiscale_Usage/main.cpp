@@ -383,7 +383,6 @@ int main(int argc, char **argv)
                                                     limitOri);
             break;
         }
-#if ITK4
         case itk::ImageIOBase::ULONG:
         {
             Image3D<unsigned long> image = dicom?Read_Itk_Image_Series<unsigned long>(imagePath):Read_Itk_Image<unsigned long>(imagePath);
@@ -398,7 +397,6 @@ int main(int argc, char **argv)
                                                     limitOri);
             break;
         }
-#endif
         case itk::ImageIOBase::LONG:
         {
             Image3D<long> image = dicom?Read_Itk_Image_Series<long>(imagePath):Read_Itk_Image<long>(imagePath);
@@ -413,7 +411,6 @@ int main(int argc, char **argv)
                                                     limitOri);
             break;
         }
-#if ITK4
         case itk::ImageIOBase::ULONGLONG:
         {
             Image3D<unsigned long long> image = dicom?Read_Itk_Image_Series<unsigned long long>(imagePath):Read_Itk_Image<unsigned long long>(imagePath);
@@ -442,7 +439,6 @@ int main(int argc, char **argv)
                                                     limitOri);
             break;
         }
-#endif
         case itk::ImageIOBase::FLOAT:
         {
             Image3D<float> image = dicom?Read_Itk_Image_Series<float>(imagePath):Read_Itk_Image<float>(imagePath);
