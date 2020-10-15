@@ -106,7 +106,9 @@ int RORPO_multiscale_usage(Image3D<PixelType> &image,
                            int dilationSize,
                            bool verbose,
                            bool normalize,
-                           std::string maskPath) {
+                           std::string maskPath,
+                           int limitOri) 
+{
     unsigned int dimz = image.dimZ();
     unsigned int dimy = image.dimY();
     unsigned int dimx= image.dimX();
@@ -386,7 +388,7 @@ int main(int argc, char **argv) {
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
-                                                    normalize
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;

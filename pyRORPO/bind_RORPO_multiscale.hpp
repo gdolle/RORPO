@@ -19,7 +19,8 @@
         py::arg("nbCores") = 1, \
         py::arg("dilationSize") = 2 , \
         py::arg("verbose") = false, \
-        py::arg("mask") = py::none() \
+        py::arg("mask") = py::none(), \
+        py::arg("limitOri") = 0 \
     ); \
 
 namespace pyRORPO
@@ -35,7 +36,8 @@ namespace pyRORPO
                     int nbCores = 1,
                     int dilationSize = 2,
                     int verbose = false,
-                    std::optional<py::array_t<PixelType>> maskArray = py::none())
+                    std::optional<py::array_t<PixelType>> maskArray = py::none(),
+                    int limitOri=0)
     {
         std::vector<int> window(3);
         window[2] = 0;
@@ -86,7 +88,7 @@ namespace pyRORPO
 
         // ---------------------- Run RORPO_multiscale -----------------------------
 
-        Image3D<PixelType> output = RORPO_multiscale<PixelType, PixelType>(image, scaleList, nbCores, dilationSize, verbose, mask);
+        Image3D<PixelType> output = RORPO_multiscale<PixelType, PixelType>(image, scaleList, nbCores, dilationSize, verbose, mask, limitOri);
 
         return image3DToPyarray<PixelType>(output);
     }
