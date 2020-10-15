@@ -33,12 +33,23 @@ Options:
 
 Usage Example :
 ```
-./RORPO_multiscale_usage input.nii output.nii 40 1.32 4
+RORPO_multiscale_usage --scaleMin 40 \
+                       --factor 1.32 \
+                       --nbScales 4 \
+                       --input=test_image.nii \
+                       --output output_image.nii
 ```
 
 Usage Example :
 ```
-./RORPO_multiscale_usage input.nii output.nii 40 1.32 4 --window 0,255 --verbose --core 4
+RORPO_multiscale_usage --core 4 \
+                       --verbose  \
+                       --window 0,255 \
+                       --scaleMin 40 \
+                       --factor 1.32 \
+                       --nbScales 4 \
+                       --input test_image.nii \
+                       --output output_image.nii
 ```
 
 ## Test
