@@ -1,10 +1,39 @@
+/* Copyright (C) 2014 Odyssee Merveille
+odyssee.merveille@gmail.com
+
+    This software is a computer program whose purpose is to compute RORPO.
+    This software is governed by the CeCILL-B license under French law and
+    abiding by the rules of distribution of free software.  You can  use,
+    modify and/ or redistribute the software under the terms of the CeCILL-B
+    license as circulated by CEA, CNRS and INRIA at the following URL
+    "http://www.cecill.info".
+
+    As a counterpart to the access to the source code and  rights to copy,
+    modify and redistribute granted by the license, users are provided only
+    with a limited warranty  and the software's author,  the holder of the
+    economic rights,  and the successive licensors  have only  limited
+    liability.
+
+    In this respect, the user's attention is drawn to the risks associated
+    with loading,  using,  modifying and/or developing or reproducing the
+    software by the user in light of its specific status of free software,
+    that may mean  that it is complicated to manipulate,  and  that  also
+    therefore means  that it is reserved for developers  and  experienced
+    professionals having in-depth computer knowledge. Users are therefore
+    encouraged to load and test the software's suitability as regards their
+    requirements in conditions enabling the security of their systems and/or
+    data to be ensured and,  more generally, to use and operate it in the
+    same conditions as regards security.
+
+    The fact that you are presently reading this means that you have had
+    knowledge of the CeCILL-B license and that you accept its terms.
+*/
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <typeinfo>
-#include <sstream>
 
 #include "docopt.h"
 #include "Image/Image.hpp"
@@ -26,18 +55,58 @@ std::vector<std::string> split(std::string str, char delimiter) {
   return internal;
 }
 
+template<typename PixelType>
+void normalize_and_write_output(std::string outputPath, bool verbose, Image3D<PixelType> multiscale) {
+
+    // getting min and max from multiscale image
+    PixelType min = 255;
+    PixelType max = 0;
+
+    for (auto value: multiscale.get_data()) {
+        if (value > max)
+            max = value;
+        if (value < min)
+            min = value;
+    }
+
+    // normalize output
+    Image3D<double> multiscale_normalized(multiscale.dimX(),
+                                         multiscale.dimY(),
+                                         multiscale.dimZ(),
+                                         multiscale.spacingX(),
+                                         multiscale.spacingY(),
+                                         multiscale.spacingZ(),
+                                         multiscale.originX(),
+                                         multiscale.originY(),
+                                         multiscale.originZ()
+    );
+
+    if (max - min == 0)
+        max = min + 1;
+
+    for (unsigned int i = 0; i < multiscale.size(); i++) {
+        multiscale_normalized.get_data()[i] = (multiscale.get_data()[i] - min) / (double) (max - min);
+    }
+
+    if (verbose) {
+        std::cout << "converting output image intensity : " << (int) min << "-" << (int) max << " to [0,1]"
+                  << std::endl;
+    }
+
+    // Write the result to nifti image
+    Write_Itk_Image<double>(multiscale_normalized, outputPath);
+}
 
 template<typename PixelType>
-int RORPO_multiscale_usage(Image3D<PixelType> image,
-                std::string outputPath,
-                std::vector<int>& scaleList,
-                std::vector<int>& window,
-                int nbCores,
-                int dilationSize,
-                int verbose,
-                std::string maskPath,
-                int limitOri)
-{
+int RORPO_multiscale_usage(Image3D<PixelType> &image,
+                           std::string outputPath,
+                           std::vector<int> &scaleList,
+                           std::vector<int> &window,
+                           int nbCores,
+                           int dilationSize,
+                           bool verbose,
+                           bool normalize,
+                           std::string maskPath) {
     unsigned int dimz = image.dimZ();
     unsigned int dimy = image.dimY();
     unsigned int dimx= image.dimX();
@@ -54,11 +123,19 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
 
     std::pair<PixelType,PixelType> minmax = image.min_max_value();
 
-    if (verbose){
+    if (verbose)
+    {
         std::cout<< "Image intensity range: "
                  << static_cast<int>(minmax.first) << ", "
                  << static_cast<int>(minmax.second) << std::endl
                  << std::endl;
+    }
+
+    // ------------------------ Negative intensities -----------------------
+    if (minmax.first < 0)
+    {
+        std::cerr << "Image contains negative values" << std::endl;
+        return 1;
     }
 
     // -------------------------- mask Image -----------------------------------
@@ -66,7 +143,7 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
     Image3D<uint8_t> mask;
 
     if (!maskPath.empty()) // A mask image is given
-	{
+    {
         mask = Read_Itk_Image<uint8_t>(maskPath);
 
         if (mask.dimX() != dimx || mask.dimY() != dimy || mask.dimZ() != dimz){
@@ -79,13 +156,13 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
 
     // #################### Convert input image to char #######################
 
-    if (window[2] == 1 || typeid(PixelType) == typeid(float) ||
+    if (window[2] > 0 || typeid(PixelType) == typeid(float) ||
             typeid(PixelType) == typeid(double))
     {
-        if (minmax.first > (PixelType) window[0])
+        if (window[2] == 2 || minmax.first > (PixelType) window[0])
             window[0] = minmax.first;
 
-        if (minmax.second < (PixelType) window[1])
+        if (window[2] == 2 || minmax.second < (PixelType) window[1])
             window[1] = minmax.second;
 
         if(verbose){
@@ -114,26 +191,15 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
                                                    limitOri);
 
         // Write the result to nifti image
-        Write_Itk_Image<uint8_t>( multiscale, outputPath );
+        if (normalize)
+            normalize_and_write_output<uint8_t>(outputPath, verbose, multiscale);
+        else
+            Write_Itk_Image<uint8_t>(multiscale, outputPath);
     }
 
     // ################## Keep input image in PixelType ########################
 
     else {
-
-        // ------------------------ Negative intensities -----------------------
-
-        if (minmax.first < 0)
-        {
-            image -= minmax.first;
-
-            if(verbose){
-                std::cout << "Convert image intensity range from [";
-                std::cout << (int)minmax.first << ", " << (int)minmax.second << "] to [";
-                std::cout << "0" << ", " << (int)minmax.second - (int)minmax.first << "]"
-                            << std::endl;
-            }
-        }
 
         // Run RORPO multiscale
         Image3D<PixelType> multiscale =
@@ -157,33 +223,11 @@ int RORPO_multiscale_usage(Image3D<PixelType> image,
                 min = value;
         }
 
-
         // normalize output
-        Image3D<float> multiscale_normalized(multiscale.dimX(),
-                                            multiscale.dimY(),
-                                            multiscale.dimZ(),
-                                            multiscale.spacingX(),
-                                            multiscale.spacingY(),
-                                            multiscale.spacingZ(),
-                                            multiscale.originX(),
-                                            multiscale.originY(),
-                                            multiscale.originZ()
-                                            );
-
-
-        for(unsigned int i=0; i<multiscale.size();i++)
-        {
-            multiscale_normalized.get_data()[i] = (multiscale.get_data()[i])/(float)(max); //
-        }
-
-        if(verbose)
-        {
-            std::cout<<"converting output image intensity :"<<(int)min<<"-"<<(int)max<<" to [0;1]"<<std::endl;
-        }
-
-        // Write the result to nifti image
-        Write_Itk_Image<float>(multiscale_normalized, outputPath);
-        //Write_Itk_Image<PixelType>(multiscale, outputPath);
+        if (normalize)
+            normalize_and_write_output(outputPath, verbose, multiscale);
+        else
+            Write_Itk_Image<PixelType>(multiscale, outputPath);
     }
 
     return 0;
@@ -195,13 +239,13 @@ static const char USAGE[] =
 R"(RORPO_multiscale_usage.
 
     USAGE:
-    RORPO_multiscale_usage --input=ImagePath --output=OutputPath --scaleMin=MinScale --factor=F --nbScales=NBS [--window=min,max] [--core=nbCores] [--dilationSize=Size] [--mask=maskPath] [--verbose] [--series]
+    RORPO_multiscale_usage --input=ImagePath --output=OutputPath --scaleMin=MinScale --factor=F --nbScales=NBS [--window=min,max] [--core=nbCores] [--dilationSize=Size] [--mask=maskPath] [--verbose] [--normalize] [--uint8] [--series]
 
     Options:
 	 --limit=<limitOri>    Limit case treatment 0 for none, 2 for 5-ori only and 1 for both 4 and 5-ori.
          --core=<nbCores>      Number of CPUs used for RPO computation \
          --dilationSize=<Size> Size of the dilation for the noise robustness step \
-         --window=min,max      Convert intensity range [min, max] of the intput \
+         --window=min,max      Convert intensity range [min, max] of the input \
                                image to [0,255] and convert to uint8 image\
                                (strongly decrease computation time).
          --mask=maskPath       Path to a mask for the input image \
@@ -209,11 +253,12 @@ R"(RORPO_multiscale_usage.
                                mask image type must be uint8.
          --verbose             Activation of a verbose mode.
          --dicom               Specify that <imagePath> is a DICOM image.
+         --normalize           Return a double normalized output image
+         --uint8               Convert input image into uint8.
         )";
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
 
     // -------------- Parse arguments and initialize parameters ----------------
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
@@ -238,6 +283,7 @@ int main(int argc, char **argv)
     int limitOri = 0;
     std::string maskPath;
     bool verbose = args["--verbose"].asBool();
+    bool normalize = args["--normalize"].asBool();
     bool dicom = args.count("--dicom");
 
     if (args["--limit"])
@@ -251,7 +297,7 @@ int main(int argc, char **argv)
 
     if(args["--dilationSize"])
         dilationSize = std::stoi(args["--dilationSize"].asString());
-    
+
     if(verbose)
         std::cout<<"dilation size:"<<dilationSize<<std::endl;
 
@@ -262,7 +308,8 @@ int main(int argc, char **argv)
         window[0] = std::stoi(windowVector[0]);
         window[1] = std::stoi(windowVector[1]);
         window[2] = 1; // --window used
-    }
+    } else if (args["--uint8"].asBool())
+        window[2] = 2; // convert input image to uint8
     else
         window[2] = 0; // --window not used
 
@@ -294,7 +341,7 @@ int main(int argc, char **argv)
     }
 
     if ( imageMetadata.nbDimensions != 3 ) {
-        std::cout << "Error: input image dimension is " << imageMetadata.nbDimensions << " but should be 3 " << std::endl;
+        std::cerr << "Error: input image dimension is " << imageMetadata.nbDimensions << " but should be 3 " << std::endl;
         return 1;
     }
 
@@ -309,6 +356,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -323,6 +371,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -337,6 +386,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize
                                                     maskPath,
                                                     limitOri);
             break;
@@ -351,6 +401,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -365,6 +416,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -379,6 +431,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -393,6 +446,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -407,11 +461,13 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
         }
-        case itk::ImageIOBase::ULONGLONG:
+#ifdef ITK_SUPPORTS_LONGLONG
+	case itk::ImageIOBase::ULONGLONG:
         {
             Image3D<unsigned long long> image = dicom?Read_Itk_Image_Series<unsigned long long>(imagePath):Read_Itk_Image<unsigned long long>(imagePath);
             error = RORPO_multiscale_usage<unsigned long long>(image,
@@ -421,6 +477,7 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
@@ -435,10 +492,12 @@ int main(int argc, char **argv)
                                                     nbCores,
                                                     dilationSize,
                                                     verbose,
+                                                    normalize,
                                                     maskPath,
                                                     limitOri);
             break;
         }
+#endif // ITK_SUPPORTS_LONGLONG
         case itk::ImageIOBase::FLOAT:
         {
             Image3D<float> image = dicom?Read_Itk_Image_Series<float>(imagePath):Read_Itk_Image<float>(imagePath);
@@ -449,6 +508,7 @@ int main(int argc, char **argv)
                                                   nbCores,
                                                   dilationSize,
                                                   verbose,
+                                                  normalize,
                                                   maskPath,
                                                   limitOri);
             break;
@@ -463,6 +523,7 @@ int main(int argc, char **argv)
                                                    nbCores,
                                                    dilationSize,
                                                    verbose,
+                                                   normalize,
                                                    maskPath,
                                                    limitOri);
             break;

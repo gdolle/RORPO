@@ -1,7 +1,7 @@
 project(RORPO)
 cmake_minimum_required(VERSION 3.2)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -23,13 +23,18 @@ message("Build Type: " ${CMAKE_BUILD_TYPE})
 include_directories(
             libRORPO/include
             Image/include
-            docopt)
+            docopt
+            pyRORPO)
 
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	enable_testing()
+endif()
 add_subdirectory(libRORPO)
 add_subdirectory(docopt)
 add_subdirectory(RORPO_multiscale_Usage)
 add_subdirectory(PO_13)
 add_subdirectory(PO)
+add_subdirectory(pyRORPO)
 
 # Generate packages
 include(InstallRequiredSystemLibraries)

@@ -7,7 +7,9 @@ Ranking Orientation Responses of Path Openings
 
 See `RORPO_multiscale_Usage --help` command.
 
-WARNING: All images must have an isotropic image resolution (cubic voxels)
+WARNING: All images are expected to have an isotropic image resolution (cubic voxels).
+The software will produce a result if this not the case but the interpretation
+of this result will be questionable.
 
 == Installation
 
@@ -16,7 +18,8 @@ WARNING: All images must have an isotropic image resolution (cubic voxels)
 Install the required dependencies beforehand. Then in a terminal
 
 ```
-git@github.com:path-openings/RORPO.git && cd RORPO
+git clone https://github.com/path-openings/RORPO.git && cd RORPO
+git submodule update --init --recursive
 
 mkdir build && cd build
 cmake ..
