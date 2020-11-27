@@ -23,8 +23,8 @@ message("Build Type: " ${CMAKE_BUILD_TYPE})
 include_directories(
             libRORPO/include
             Image/include
-            docopt
-            pyRORPO)
+            docopt)
+        #            pyRORPO)
 
 if (NOT ${CMAKE_BUILD_TYPE} STREQUAL "Release")
 	enable_testing()
@@ -34,7 +34,7 @@ add_subdirectory(docopt)
 add_subdirectory(RORPO_multiscale_Usage)
 add_subdirectory(PO_13)
 add_subdirectory(PO)
-add_subdirectory(pyRORPO)
+#add_subdirectory(pyRORPO)
 
 # Generate packages
 include(InstallRequiredSystemLibraries)
