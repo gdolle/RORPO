@@ -36,6 +36,7 @@ odyssee.merveille@gmail.com
 #include <vector>
 #include <itkImageFileReader.h>
 #include <itkImageFileWriter.h>
+#include <itkImageIOBase.h>
 #include <itkImportImageFilter.h>
 #include <itkImageSeriesReader.h>
 #include <itkGDCMImageIO.h>
@@ -47,9 +48,15 @@ odyssee.merveille@gmail.com
 
 
 // ############################# MHA Image ##############################
+#if (ITK_VERSION_MAJOR < 5 or (ITK_VERSION_MAJOR == 5 and ITK_VERSION_MINOR<=2))
+using PixelTypeEnum = itk::ImageIOBase::IOComponentType;
+#else // ITK >= 5.2.0
+using PixelTypeEnum = itk::IOComponentEnum;
+#endif
+
 
 struct Image3DMetadata {
-    itk::IOComponentEnum pixelType;
+    PixelTypeEnum pixelType;
     std::string pixelTypeString;
     uint nbDimensions;
 };
@@ -66,8 +73,9 @@ std::optional<Image3DMetadata> Read_Itk_Metadata(const std::string &image_path) 
     imageIO->ReadImageInformation();
 
     return std::optional<Image3DMetadata>(
-            {imageIO->GetComponentType(), imageIO->GetComponentTypeAsString(imageIO->GetComponentType()),
-             imageIO->GetNumberOfDimensions()});
+            { imageIO->GetComponentType(), 
+              imageIO->GetComponentTypeAsString(imageIO->GetComponentType()),
+              imageIO->GetNumberOfDimensions() });
 }
 
 template<typename PixelType>

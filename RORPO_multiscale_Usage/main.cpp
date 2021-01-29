@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
     }
 
     switch (imageMetadata.pixelType){
-        case itk::ImageIOBase::UCHAR:
+        case PixelTypeEnum::UCHAR:
         {
             Image3D<unsigned char> image = dicom?Read_Itk_Image_Series<unsigned char>(imagePath):Read_Itk_Image<unsigned char>(imagePath);
             error = RORPO_multiscale_usage<unsigned char>(image,
@@ -340,7 +340,7 @@ int main(int argc, char **argv) {
                                                           maskPath);
             break;
         }
-        case itk::ImageIOBase::CHAR:
+        case PixelTypeEnum::CHAR:
         {
             Image3D<char> image = dicom?Read_Itk_Image_Series<char>(imagePath):Read_Itk_Image<char>(imagePath);
             error = RORPO_multiscale_usage<char>(image,
@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
                                                  maskPath);
             break;
         }
-        case itk::ImageIOBase::USHORT:
+        case PixelTypeEnum::USHORT:
         {
             Image3D<unsigned short> image = dicom?Read_Itk_Image_Series<unsigned short>(imagePath):Read_Itk_Image<unsigned short>(imagePath);
             error = RORPO_multiscale_usage<unsigned short>(image,
@@ -368,7 +368,7 @@ int main(int argc, char **argv) {
                                                            maskPath);
             break;
         }
-        case itk::ImageIOBase::SHORT:
+        case PixelTypeEnum::SHORT:
         {
             Image3D<short> image = dicom?Read_Itk_Image_Series<short>(imagePath):Read_Itk_Image<short>(imagePath);
             error = RORPO_multiscale_usage<short>(image,
@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
                                                   maskPath);
             break;
         }
-        case itk::ImageIOBase::UINT:
+        case PixelTypeEnum::UINT:
         {
             Image3D<unsigned int> image = dicom?Read_Itk_Image_Series<unsigned int>(imagePath):Read_Itk_Image<unsigned int>(imagePath);
             error = RORPO_multiscale_usage<unsigned int>(image,
@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
                                                          maskPath);
             break;
         }
-        case itk::ImageIOBase::INT:
+        case PixelTypeEnum::INT:
         {
             Image3D<int> image = dicom?Read_Itk_Image_Series<int>(imagePath):Read_Itk_Image<int>(imagePath);
             error = RORPO_multiscale_usage<int>(image,
@@ -410,7 +410,7 @@ int main(int argc, char **argv) {
                                                 maskPath);
             break;
         }
-        case itk::ImageIOBase::ULONG:
+        case PixelTypeEnum::ULONG:
         {
             Image3D<unsigned long> image = dicom?Read_Itk_Image_Series<unsigned long>(imagePath):Read_Itk_Image<unsigned long>(imagePath);
             error = RORPO_multiscale_usage<unsigned long>(image,
@@ -424,7 +424,7 @@ int main(int argc, char **argv) {
                                                           maskPath);
             break;
         }
-        case itk::ImageIOBase::LONG:
+        case PixelTypeEnum::LONG:
         {
             Image3D<long> image = dicom?Read_Itk_Image_Series<long>(imagePath):Read_Itk_Image<long>(imagePath);
             error = RORPO_multiscale_usage<long>(image,
@@ -439,7 +439,7 @@ int main(int argc, char **argv) {
             break;
         }
 #ifdef ITK_SUPPORTS_LONGLONG
-	case itk::ImageIOBase::ULONGLONG:
+	case PixelTypeEnum::ULONGLONG:
         {
             Image3D<unsigned long long> image = dicom?Read_Itk_Image_Series<unsigned long long>(imagePath):Read_Itk_Image<unsigned long long>(imagePath);
             error = RORPO_multiscale_usage<unsigned long long>(image,
@@ -453,7 +453,7 @@ int main(int argc, char **argv) {
                                                                maskPath);
             break;
         }
-        case itk::ImageIOBase::LONGLONG:
+        case PixelTypeEnum::LONGLONG:
         {
             Image3D<long long> image = dicom?Read_Itk_Image_Series<long long>(imagePath):Read_Itk_Image<long long>(imagePath);
             error = RORPO_multiscale_usage<long long>(image,
@@ -468,7 +468,7 @@ int main(int argc, char **argv) {
             break;
         }
 #endif // ITK_SUPPORTS_LONGLONG
-        case itk::ImageIOBase::FLOAT:
+        case PixelTypeEnum::FLOAT:
         {
             Image3D<float> image = dicom?Read_Itk_Image_Series<float>(imagePath):Read_Itk_Image<float>(imagePath);
             error = RORPO_multiscale_usage<float>(image,
@@ -482,7 +482,7 @@ int main(int argc, char **argv) {
                                                   maskPath);
             break;
         }
-        case itk::ImageIOBase::DOUBLE:
+        case PixelTypeEnum::DOUBLE:
         {
             Image3D<double> image = dicom?Read_Itk_Image_Series<double>(imagePath):Read_Itk_Image<double>(imagePath);
             error = RORPO_multiscale_usage<double>(image,
@@ -496,7 +496,7 @@ int main(int argc, char **argv) {
                                                    maskPath);
             break;
         }
-        case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:
+        case PixelTypeEnum::UNKNOWNCOMPONENTTYPE:
         default:
             error = 1;
             std::cout << "Error: pixel type unknown." << std::endl;
