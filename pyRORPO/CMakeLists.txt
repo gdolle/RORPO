@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.2)
+cmake_policy(SET CMP0048 NEW)
 
-project(pyRORPO)
+project(pyRORPO
+        VERSION 1 # Do not change! Parent cmake project version used.
+        DESCRIPTION "Ranking Orientation Responses of Path Openings python API"
+        LANGUAGES CXX)
 
 # FIND OPENMP
 find_package(OpenMP REQUIRED)

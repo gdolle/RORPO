@@ -1,7 +1,7 @@
 # RORPO Lib
 
 project(libRORPO)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 # FIND OPENMP
 find_package( OpenMP REQUIRED)
