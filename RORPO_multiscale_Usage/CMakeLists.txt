@@ -3,6 +3,9 @@
 project (RORPO_multiscale_usage)
 cmake_minimum_required(VERSION 3.2)
 
+add_subdirectory(docopt.cpp)
+include_directories(docopt.cpp)
+
 # FIND OPENMP
 find_package(OpenMP REQUIRED)
 if(OPENMP_FOUND)
