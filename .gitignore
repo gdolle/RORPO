@@ -1,5 +1,9 @@
 *.txt.user
 *~
 build
-
+CMakeFiles
+cmake_install.cmake
+ITKFactoryRegistration
+*.so
+*.a
 obj
